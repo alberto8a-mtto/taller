@@ -223,7 +223,7 @@ function mostrarReportes(reportes) {
 
 // ========== DETALLE DE REPORTE ==========
 async function verDetalle(id) {
-  const reportes = obtenerReportes();
+  const reportes = await obtenerReportes();
   const reporte = reportes.find(r => r.id === id);
   
   if (!reporte) {
@@ -486,7 +486,7 @@ async function buscarPorVehiculo() {
     return;
   }
   
-  const reportes = obtenerReportes();
+  const reportes = await obtenerReportes();
   const reportesVehiculo = reportes.filter(r => r.numero_vehiculo === numeroVehiculo);
   
   // Ordenar por fecha de reporte (más reciente primero)
