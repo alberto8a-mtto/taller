@@ -2,6 +2,17 @@
 let reporteActual = null;
 let deferredPrompt = null;
 
+// Lista de técnicos de la empresa
+const TECNICOS = [
+  'ALEJANDRO GOMEZ',
+  'MATEO GARCIA',
+  'YERMINSON MURIEL',
+  'JUAN CARLOS GALLEGO',
+  'CARLOS PATIÑO',
+  'JHON CHAVARRIA',
+  'JORGE ACOSTA'
+];
+
 // ========== ALMACENAMIENTO LOCAL ==========
 const STORAGE_KEY = 'gestion_taller_reportes';
 const STORAGE_KEY_PROVEEDORES = 'gestion_taller_proveedores';
@@ -67,7 +78,7 @@ function cargarDatosPrueba() {
         numero_vehiculo: '023',
         estado: 'TÉCNICO ASIGNADO',
         descripcion: 'Falla en el sistema de frenos',
-        tecnico_asignado: 'Carlos Rodríguez',
+        tecnico_asignado: 'ALEJANDRO GOMEZ',
         taller_asignado: null,
         diagnostico: null,
         requiere_reparacion: null,
@@ -80,7 +91,7 @@ function cargarDatosPrueba() {
         numero_vehiculo: '045',
         estado: 'ANÁLISIS',
         descripcion: 'Luces delanteras intermitentes',
-        tecnico_asignado: 'Pedro Electricista',
+        tecnico_asignado: 'MATEO GARCIA',
         taller_asignado: null,
         diagnostico: null,
         requiere_reparacion: null,
@@ -93,7 +104,7 @@ function cargarDatosPrueba() {
         numero_vehiculo: '067',
         estado: 'TALLER',
         descripcion: 'Cambio de aceite y filtros',
-        tecnico_asignado: 'Miguel Mecánico',
+        tecnico_asignado: 'YERMINSON MURIEL',
         taller_asignado: 'Taller Central',
         diagnostico: null,
         requiere_reparacion: null,
@@ -106,7 +117,7 @@ function cargarDatosPrueba() {
         numero_vehiculo: '089',
         estado: 'DIAGNÓSTICO',
         descripcion: 'Pérdida de potencia en subidas',
-        tecnico_asignado: 'Jorge Especialista',
+        tecnico_asignado: 'JUAN CARLOS GALLEGO',
         taller_asignado: 'Taller Motor',
         diagnostico: 'Filtro de combustible obstruido. Requiere reemplazo inmediato.',
         requiere_reparacion: 1,
@@ -119,7 +130,7 @@ function cargarDatosPrueba() {
         numero_vehiculo: '012',
         estado: 'REPARACIÓN',
         descripcion: 'Reemplazo de correa de distribución',
-        tecnico_asignado: 'Roberto Técnico',
+        tecnico_asignado: 'CARLOS PATIÑO',
         taller_asignado: 'Taller Mecánico',
         diagnostico: 'Correa desgastada, requiere cambio urgente',
         requiere_reparacion: 1,
@@ -132,7 +143,7 @@ function cargarDatosPrueba() {
         numero_vehiculo: '034',
         estado: 'SEGUIMIENTO',
         descripcion: 'Revisión post-reparación de frenos',
-        tecnico_asignado: 'Carlos Técnico',
+        tecnico_asignado: 'JHON CHAVARRIA',
         taller_asignado: 'Taller Frenos',
         diagnostico: 'Reparación completada exitosamente',
         requiere_reparacion: 0,
@@ -373,7 +384,10 @@ function generarFormularioActualizacion(reporte) {
       
       <div class="form-group" id="campoTecnico" style="display: none;">
         <label>Técnico Asignado:</label>
-        <input type="text" id="tecnicoAsignado" placeholder="Nombre del técnico">
+        <select id="tecnicoAsignado">
+          <option value="">-- Seleccionar Técnico --</option>
+          ${TECNICOS.map(tecnico => `<option value="${tecnico}">${tecnico}</option>`).join('')}
+        </select>
       </div>
       
       <div class="form-group" id="campoTaller" style="display: none;">
