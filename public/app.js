@@ -13,30 +13,68 @@ const TECNICOS = [
   'JORGE ACOSTA'
 ];
 
-// ========== ALMACENAMIENTO LOCAL ==========
+// ========== ALMACENAMIENTO LOCAL Y GOOGLE SHEETS ==========
 const STORAGE_KEY = 'gestion_taller_reportes';
 const STORAGE_KEY_PROVEEDORES = 'gestion_taller_proveedores';
 
-function obtenerReportes() {
+// Obtener reportes (primero intenta Google Sheets, luego localStorage)
+async function obtenerReportes() {
+  if (typeof googleSheets !== 'undefined' && googleSheets.isConfigured()) {
+    try {
+      return await googleSheets.leerReportes();
+    } catch (error) {
+      console.error('Error al leer desde Google Sheets, usando localStorage:', error);
+    }
+  }
+  
   const data = localStorage.getItem(STORAGE_KEY);
   return data ? JSON.parse(data) : [];
 }
 
-function guardarReportes(reportes) {
+// Guardar reportes (guarda en localStorage y Google Sheets)
+async function guardarReportes(reportes) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(reportes));
+  
+  if (typeof googleSheets !== 'undefined' && googleSheets.isConfigured()) {
+    try {
+      await googleSheets.guardarReportes(reportes);
+      console.log('✅ Datos sincronizados con Google Sheets');
+    } catch (error) {
+      console.error('⚠️ Error al sincronizar con Google Sheets:', error);
+    }
+  }
 }
 
-function obtenerProveedores() {
+// Obtener proveedores
+async function obtenerProveedores() {
+  if (typeof googleSheets !== 'undefined' && googleSheets.isConfigured()) {
+    try {
+      return await googleSheets.leerProveedores();
+    } catch (error) {
+      console.error('Error al leer proveedores desde Google Sheets:', error);
+    }
+  }
+  
   const data = localStorage.getItem(STORAGE_KEY_PROVEEDORES);
   return data ? JSON.parse(data) : [];
 }
 
-function guardarProveedores(proveedores) {
+// Guardar proveedores
+async function guardarProveedores(proveedores) {
   localStorage.setItem(STORAGE_KEY_PROVEEDORES, JSON.stringify(proveedores));
+  
+  if (typeof googleSheets !== 'undefined' && googleSheets.isConfigured()) {
+    try {
+      await googleSheets.guardarProveedores(proveedores);
+      console.log('✅ Proveedores sincronizados con Google Sheets');
+    } catch (error) {
+      console.error('⚠️ Error al sincronizar proveedores:', error);
+    }
+  }
 }
 
-function obtenerSiguienteId() {
-  const reportes = obtenerReportes();
+async function obtenerSiguienteId() {
+  const reportes = await obtenerReportes();
   return reportes.length > 0 ? Math.max(...reportes.map(r => r.id)) + 1 : 1;
 }
 
@@ -115,9 +153,10 @@ async function crearReporte() {
     return;
   }
   
-  const reportes = obtenerReportes();
+  const reportes = await obtenerReportes();
+  const nextId = await obtenerSiguienteId();
   const nuevoReporte = {
-    id: obtenerSiguienteId(),
+    id: nextId,
     numero_vehiculo,
     estado: 'REPORTE',
     descripcion,
@@ -131,7 +170,7 @@ async function crearReporte() {
   };
   
   reportes.push(nuevoReporte);
-  guardarReportes(reportes);
+  await guardarReportes(reportes);
   
   mostrarToast('✅ Reporte creado exitosamente', 'success');
   document.getElementById('formNuevoReporte').reset();
@@ -143,7 +182,7 @@ async function crearReporte() {
 // ========== CARGA DE DATOS ==========
 async function cargarReportes() {
   const filtro = document.getElementById('filtroEstado').value;
-  let reportes = obtenerReportes();
+  let reportes = await obtenerReportes();
   
   if (filtro) {
     reportes = reportes.filter(r => r.estado === filtro);
@@ -411,7 +450,7 @@ async function actualizarReporte() {
     return;
   }
   
-  const reportes = obtenerReportes();
+  const reportes = await obtenerReportes();
   const index = reportes.findIndex(r => r.id === reporteActual.id);
   
   if (index === -1) {
@@ -430,7 +469,7 @@ async function actualizarReporte() {
   if (analisisInicial) reportes[index].analisis = analisisInicial;
   if (notas) reportes[index].notas = notas;
   
-  guardarReportes(reportes);
+  await guardarReportes(reportes);
   
   mostrarToast('✅ Reporte actualizado exitosamente', 'success');
   cerrarModal();
@@ -485,7 +524,7 @@ async function buscarPorVehiculo() {
 
 // ========== ESTADÍSTICAS ==========
 async function cargarEstadisticas() {
-  const reportes = obtenerReportes();
+  const reportes = await obtenerReportes();
   
   if (reportes.length === 0) {
     const container = document.getElementById('estadisticasContent');
@@ -620,8 +659,8 @@ function cargarProveedoresPrueba() {
   console.log('✅ Módulo de proveedores iniciado sin datos de prueba');
 }
 
-function cargarProveedores() {
-  const proveedores = obtenerProveedores();
+async function cargarProveedores() {
+  const proveedores = await obtenerProveedores();
   const container = document.getElementById('listaProveedores');
   
   if (proveedores.length === 0) {

@@ -39,11 +39,23 @@ function actualizarReloj() {
 }
 
 // ========== CARGAR DATOS ==========
-function cargarDatosDashboard() {
+async function cargarDatosDashboard() {
   try {
-    // Obtener todos los reportes del localStorage
-    const data = localStorage.getItem(STORAGE_KEY);
-    let reportes = data ? JSON.parse(data) : [];
+    let reportes = [];
+    
+    // Intentar leer desde Google Sheets primero
+    if (typeof googleSheets !== 'undefined' && googleSheets.isConfigured()) {
+      try {
+        reportes = await googleSheets.leerReportes();
+      } catch (error) {
+        console.warn('⚠️ Error al leer Google Sheets, usando localStorage:', error);
+        reportes = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      }
+    } else {
+      // Obtener todos los reportes del localStorage
+      const data = localStorage.getItem(STORAGE_KEY);
+      reportes = data ? JSON.parse(data) : [];
+    }
     
     // Si no hay datos, cargar datos por defecto
     if (reportes.length === 0) {
