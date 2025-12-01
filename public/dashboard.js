@@ -43,7 +43,13 @@ function cargarDatosDashboard() {
   try {
     // Obtener todos los reportes del localStorage
     const data = localStorage.getItem(STORAGE_KEY);
-    const reportes = data ? JSON.parse(data) : [];
+    let reportes = data ? JSON.parse(data) : [];
+    
+    // Si no hay datos, cargar datos por defecto
+    if (reportes.length === 0) {
+      cargarDatosIniciales();
+      reportes = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    }
     
     // Filtrar vehículos en proceso (no en SEGUIMIENTO)
     const vehiculosEnProceso = reportes.filter(r => r.estado !== 'SEGUIMIENTO');
