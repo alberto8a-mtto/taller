@@ -372,6 +372,31 @@ function mostrarModalDetalle(reporte) {
 function generarFormularioActualizacion(reporte) {
   const siguientesEstados = obtenerSiguientesEstados(reporte.estado);
   
+  // Si el estado actual es REPORTE, mostrar primero el selector de técnico
+  if (reporte.estado === 'REPORTE') {
+    return `
+      <form id="formActualizar" onsubmit="event.preventDefault(); actualizarReporte();">
+        <div class="form-group">
+          <label>Técnico Asignado: *</label>
+          <select id="tecnicoAsignado" required>
+            <option value="">-- Seleccionar Técnico --</option>
+            ${TECNICOS.map(tecnico => `<option value="${tecnico}">${tecnico}</option>`).join('')}
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Notas:</label>
+          <textarea id="notas" rows="2" placeholder="Notas adicionales..."></textarea>
+        </div>
+        
+        <input type="hidden" id="nuevoEstado" value="TÉCNICO ASIGNADO">
+        
+        <button type="submit" class="btn btn-primary">Asignar Técnico</button>
+      </form>
+    `;
+  }
+  
+  // Para otros estados, mostrar el formulario normal
   return `
     <form id="formActualizar" onsubmit="event.preventDefault(); actualizarReporte();">
       <div class="form-group">
