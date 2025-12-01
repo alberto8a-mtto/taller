@@ -5,7 +5,7 @@
 let updateInterval;
 let rotationInterval;
 const REFRESH_INTERVAL = 10000; // 10 segundos
-const ROTATION_INTERVAL = 5000; // 5 segundos para rotar vehículos
+const ROTATION_INTERVAL = 60000; // 60 segundos (1 minuto) para rotar vehículos
 const STORAGE_KEY = 'gestion_taller_reportes';
 const VEHICULOS_POR_PAGINA = 6; // Cantidad de vehículos a mostrar por vez
 let paginaActual = 0;
