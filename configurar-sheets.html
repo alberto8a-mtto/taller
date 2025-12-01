@@ -133,52 +133,40 @@
 
     <!-- PASO 2 -->
     <div class="step">
-      <h3>🔑 Paso 2: Obtener API Key</h3>
+      <h3>📝 Paso 2: Crear Apps Script</h3>
       <ol>
-        <li>Ve a <a href="https://console.cloud.google.com" target="_blank" class="link">Google Cloud Console</a></li>
-        <li>Crea un nuevo proyecto o selecciona uno existente</li>
-        <li>Ve a <strong>API y servicios → Biblioteca</strong></li>
-        <li>Busca y habilita <code>Google Sheets API</code></li>
-        <li>Ve a <strong>API y servicios → Credenciales</strong></li>
-        <li>Haz clic en <strong>+ CREAR CREDENCIALES → Clave de API</strong></li>
-        <li>Copia la clave que se genera</li>
+        <li>En tu Google Sheet, ve a <strong>Extensiones → Apps Script</strong></li>
+        <li>Borra el código por defecto</li>
+        <li>Copia y pega el código del archivo <code>SCRIPT-GOOGLE-APPS.txt</code></li>
+        <li>Haz clic en <strong>💾 Guardar</strong></li>
       </ol>
     </div>
 
     <!-- PASO 3 -->
     <div class="step">
-      <h3>🔗 Paso 3: Obtener ID de la Hoja</h3>
+      <h3>🚀 Paso 3: Implementar como Aplicación Web</h3>
       <ol>
-        <li>Abre tu Google Sheet</li>
-        <li>Mira la URL en el navegador</li>
-        <li>Copia el ID que está entre <code>/d/</code> y <code>/edit</code></li>
-        <li>Ejemplo: <code>https://docs.google.com/spreadsheets/d/<strong>1ABC...xyz</strong>/edit</code></li>
+        <li>En Apps Script, haz clic en <strong>Implementar → Nueva implementación</strong></li>
+        <li>Haz clic en el icono ⚙️ y selecciona <strong>Aplicación web</strong></li>
+        <li>Configuración:
+          <ul>
+            <li><strong>Ejecutar como:</strong> Yo</li>
+            <li><strong>Quién tiene acceso:</strong> Cualquier persona</li>
+          </ul>
+        </li>
+        <li>Haz clic en <strong>Implementar</strong></li>
+        <li>Autoriza los permisos necesarios</li>
+        <li><strong>Copia la URL</strong> que se genera (algo como <code>https://script.google.com/macros/s/...</code>)</li>
       </ol>
-    </div>
-
-    <!-- PASO 4 -->
-    <div class="step">
-      <h3>🌐 Paso 4: Hacer la hoja pública (solo lectura)</h3>
-      <ol>
-        <li>En tu Google Sheet, haz clic en <strong>Compartir</strong></li>
-        <li>Cambia a "Cualquier persona con el enlace puede <strong>ver</strong>"</li>
-        <li>Haz clic en <strong>Listo</strong></li>
-      </ol>
-      <p><strong>Nota:</strong> La hoja solo será de lectura pública. Solo esta aplicación podrá escribir con la API Key.</p>
     </div>
 
     <!-- FORMULARIO -->
     <div class="step">
-      <h3>⚙️ Paso 5: Configurar en el Sistema</h3>
+      <h3>⚙️ Paso 4: Configurar en el Sistema</h3>
       
       <div class="input-group">
-        <label for="apiKey">API Key de Google:</label>
-        <input type="text" id="apiKey" placeholder="AIzaSy...">
-      </div>
-
-      <div class="input-group">
-        <label for="sheetId">ID del Google Sheet:</label>
-        <input type="text" id="sheetId" placeholder="1ABC...xyz">
+        <label for="scriptUrl">URL del Apps Script:</label>
+        <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/...">
       </div>
 
       <button class="btn btn-primary" onclick="guardarConfiguracion()">💾 Guardar Configuración</button>
@@ -196,19 +184,17 @@
     </div>
   </div>
 
-  <script src="google-sheets.js"></script>
+  <script src="google-apps-script.js"></script>
   <script>
     // Verificar estado actual
     window.addEventListener('DOMContentLoaded', () => {
-      const apiKey = localStorage.getItem('google_sheets_api_key');
-      const sheetId = localStorage.getItem('google_sheets_id');
+      const scriptUrl = localStorage.getItem('google_script_url');
       
-      if (apiKey && sheetId) {
-        document.getElementById('apiKey').value = apiKey;
-        document.getElementById('sheetId').value = sheetId;
+      if (scriptUrl) {
+        document.getElementById('scriptUrl').value = scriptUrl;
         document.getElementById('estadoActual').textContent = '✅ Configurado';
         document.getElementById('estadoActual').style.color = '#28a745';
-        googleSheets.configure(apiKey, sheetId);
+        googleSheets.configure(scriptUrl);
       } else {
         document.getElementById('estadoActual').textContent = '❌ No configurado';
         document.getElementById('estadoActual').style.color = '#dc3545';
@@ -216,15 +202,14 @@
     });
 
     function guardarConfiguracion() {
-      const apiKey = document.getElementById('apiKey').value.trim();
-      const sheetId = document.getElementById('sheetId').value.trim();
+      const scriptUrl = document.getElementById('scriptUrl').value.trim();
       
-      if (!apiKey || !sheetId) {
-        mostrarEstado('error', '❌ Por favor completa todos los campos');
+      if (!scriptUrl) {
+        mostrarEstado('error', '❌ Por favor ingresa la URL del Apps Script');
         return;
       }
 
-      googleSheets.configure(apiKey, sheetId);
+      googleSheets.configure(scriptUrl);
       document.getElementById('estadoActual').textContent = '✅ Configurado';
       document.getElementById('estadoActual').style.color = '#28a745';
       mostrarEstado('success', '✅ Configuración guardada correctamente');
