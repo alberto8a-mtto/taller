@@ -1,0 +1,339 @@
+/* ========================================
+   DASHBOARD TV - ALBERTO OCHOA
+   ======================================== */
+
+:root {
+  --brand-black: #1a1a1a;
+  --brand-red: #e31e24;
+  --brand-red-dark: #b91820;
+  --text-white: #ffffff;
+  --text-dark: #1a1a1a;
+  --background: #ffffff;
+  --card-bg: #f8f9fa;
+  --border-color: #e0e0e0;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  background: var(--background);
+  color: var(--text-dark);
+  overflow-x: hidden;
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
+.dashboard-header {
+  background: linear-gradient(135deg, var(--brand-black), #2a2a2a);
+  padding: 1.5rem 2rem;
+  border-bottom: 4px solid var(--brand-red);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  max-width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-logo h1 {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: var(--text-white);
+}
+
+.brand-red {
+  color: var(--brand-red);
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: #ccc;
+  margin-top: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.header-info {
+  text-align: right;
+}
+
+.current-time {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--brand-red);
+  margin-bottom: 0.5rem;
+}
+
+.update-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #ccc;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ========================================
+   SECTION
+   ======================================== */
+.vehicles-section {
+  padding: 2rem;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.section-title h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.count-badge {
+  background: var(--brand-red);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* ========================================
+   GRID
+   ======================================== */
+.vehicles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 1.5rem;
+}
+
+/* ========================================
+   VEHICLE CARD
+   ======================================== */
+.vehicle-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border-left: 6px solid var(--brand-red);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.vehicle-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(227, 30, 36, 0.2);
+}
+
+.vehicle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.vehicle-number {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--brand-red);
+}
+
+.vehicle-status-badge {
+  background: rgba(227, 30, 36, 0.2);
+  color: var(--brand-red);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 2px solid var(--brand-red);
+}
+
+/* Estados específicos */
+.estado-REPORTE .vehicle-status-badge {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.estado-TECNICO-ASIGNADO .vehicle-status-badge {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.estado-ANALISIS .vehicle-status-badge {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.estado-TALLER .vehicle-status-badge {
+  background: rgba(168, 85, 247, 0.2);
+  color: #a855f7;
+  border-color: #a855f7;
+}
+
+.estado-DIAGNOSTICO .vehicle-status-badge {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border-color: #10b981;
+}
+
+.estado-REPARACION .vehicle-status-badge {
+  background: rgba(234, 179, 8, 0.2);
+  color: #eab308;
+  border-color: #eab308;
+}
+
+.vehicle-info-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.info-line {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.info-line strong {
+  color: #666;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-line span {
+  color: var(--text-dark);
+  font-size: 1rem;
+}
+
+.info-line.warning {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-left: 3px solid #f59e0b;
+}
+
+.info-line.warning strong {
+  color: #f59e0b;
+}
+
+/* ========================================
+   NO DATA
+   ======================================== */
+.no-data {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.no-data-icon {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.no-data-text {
+  font-size: 1.5rem;
+  color: #999;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 1400px) {
+  .vehicles-grid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .vehicles-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .header-logo h1 {
+    font-size: 1.5rem;
+  }
+  
+  .current-time {
+    font-size: 1.5rem;
+  }
+}
+
+/* ========================================
+   ANIMACIONES
+   ======================================== */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.vehicle-card {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* ========================================
+   PANTALLA COMPLETA
+   ======================================== */
+:fullscreen {
+  background: var(--background);
+}
+
+:fullscreen .dashboard-header {
+  padding: 2rem 3rem;
+}
+
+:fullscreen .vehicles-section {
+  padding: 3rem;
+}
+
+:fullscreen .vehicles-grid {
+  gap: 2rem;
+}
