@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1a1a1a">
+  <title>Dashboard TV - Alberto Ochoa & Cía. S.A.S</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div id="dashboard">
+    <!-- Header -->
+    <header class="dashboard-header">
+      <div class="header-content">
+        <div class="header-logo">
+          <h1>ALBERTO <span class="brand-red">OCHOA</span> & CÍA. S.A.S</h1>
+          <p class="subtitle">Dashboard de Taller en Tiempo Real</p>
+        </div>
+        <div class="header-info">
+          <div class="current-time" id="currentTime"></div>
+          <div class="update-indicator" id="updateIndicator">
+            <span class="dot"></span> Actualizando cada 10s
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Vehículos en Proceso -->
+    <section class="vehicles-section">
+      <div class="section-title">
+        <h2>🚗 Vehículos en Proceso</h2>
+        <div class="count-badge" id="countBadge">0</div>
+      </div>
+      <div class="vehicles-grid" id="vehiclesGrid">
+        <!-- Los vehículos se cargarán dinámicamente -->
+      </div>
+    </section>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

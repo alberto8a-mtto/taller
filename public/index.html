@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#e31e24">
+  <meta name="description" content="Sistema de Gestión de Taller - Alberto Ochoa & Cía. S.A.S">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Gestión de Taller - Alberto Ochoa</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <div class="header-logo">
+          <h1>🔧 Gestión de <span class="brand-highlight">Taller</span></h1>
+        </div>
+        <button id="installBtn" class="install-btn" style="display: none;">
+          📱 Instalar
+        </button>
+      </div>
+    </header>
+
+    <!-- Navegación -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-view="nuevo">Nuevo Reporte</button>
+      <button class="tab-btn" data-view="lista">Lista</button>
+      <button class="tab-btn" data-view="proveedores">Proveedores</button>
+      <button class="tab-btn" data-view="estadisticas">Estadísticas</button>
+    </nav>
+
+    <!-- Vista: Nuevo Reporte -->
+    <div id="view-nuevo" class="view active">
+      <div class="container">
+        <div class="card">
+          <h2>📝 Nuevo Reporte</h2>
+          <form id="formNuevoReporte">
+            <div class="form-group">
+              <label for="numero_vehiculo">Número de Vehículo *</label>
+              <input type="text" id="numero_vehiculo" required placeholder="Ej: 001, 002, VH-123">
+            </div>
+            
+            <div class="form-group">
+              <label for="conductor">Conductor</label>
+              <input type="text" id="conductor" placeholder="Nombre del conductor">
+            </div>
+            
+            <div class="form-group">
+              <label for="descripcion">Descripción del Problema *</label>
+              <textarea id="descripcion" required rows="4" placeholder="Describe la novedad reportada..."></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Crear Reporte</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>🔍 Buscar Reportes de un Vehículo</h2>
+          <div class="form-group">
+            <input type="text" id="buscarVehiculo" placeholder="Número de vehículo">
+            <button onclick="buscarPorVehiculo()" class="btn btn-secondary">Buscar</button>
+          </div>
+          <div id="resultadosBusqueda"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista: Lista de Reportes -->
+    <div id="view-lista" class="view">
+      <div class="container">
+        <div class="filters">
+          <label>Filtrar por estado:</label>
+          <select id="filtroEstado" onchange="cargarReportes()">
+            <option value="">Todos</option>
+            <option value="REPORTE">REPORTE</option>
+            <option value="TÉCNICO ASIGNADO">TÉCNICO ASIGNADO</option>
+            <option value="ANÁLISIS">ANÁLISIS</option>
+            <option value="TALLER">TALLER</option>
+            <option value="DIAGNÓSTICO">DIAGNÓSTICO</option>
+            <option value="REPARACIÓN">REPARACIÓN</option>
+            <option value="SEGUIMIENTO">SEGUIMIENTO</option>
+          </select>
+          <button onclick="cargarReportes()" class="btn btn-secondary">🔄 Actualizar</button>
+        </div>
+        
+        <div id="listaReportes" class="reportes-grid"></div>
+      </div>
+    </div>
+
+    <!-- Vista: Estadísticas -->
+    <div id="view-estadisticas" class="view">
+      <div class="container">
+        <div class="card">
+          <h2>📊 Estadísticas</h2>
+          <div id="estadisticasContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista: Proveedores/Talleres -->
+    <div id="view-proveedores" class="view">
+      <div class="container">
+        <div class="card">
+          <h2>🏭 Proveedores y Talleres</h2>
+          <button class="btn btn-primary" onclick="abrirFormularioProveedor()">
+            ➕ Agregar Proveedor
+          </button>
+          <div id="listaProveedores" class="list-container"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Detalle/Edición -->
+    <div id="modalDetalle" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="cerrarModal()">&times;</span>
+        <div id="detalleReporte"></div>
+      </div>
+    </div>
+
+    <!-- Modal de Proveedor -->
+    <div id="modalProveedor" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="cerrarModalProveedor()">&times;</span>
+        <div id="formularioProveedor"></div>
+      </div>
+    </div>
+
+    <!-- Notificación Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>&copy; 2025 - Todos los derechos reservados</p>
+      <p class="footer-version">Sistema de Gestión de Taller v1.0.0</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
