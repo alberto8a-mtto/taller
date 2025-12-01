@@ -4,8 +4,15 @@
 
 class GoogleAppsScriptDB {
   constructor() {
-    this.scriptUrl = localStorage.getItem('google_script_url') || '';
-    this.syncEnabled = false;
+    // URL predeterminada del Apps Script
+    const defaultUrl = 'https://script.google.com/macros/s/AKfycbw1Z8aPXeztRpr6TR-d7u9B79FvpcRpntLtw__2A8g3lJrkL3xIKd3pcMFjgmfwzwlggQ/exec';
+    this.scriptUrl = localStorage.getItem('google_script_url') || defaultUrl;
+    this.syncEnabled = true;
+    
+    // Guardar URL por defecto si no existe
+    if (!localStorage.getItem('google_script_url')) {
+      localStorage.setItem('google_script_url', defaultUrl);
+    }
   }
 
   // ========== CONFIGURACIÓN ==========
