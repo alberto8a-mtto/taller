@@ -203,7 +203,7 @@ function mostrarReportes(reportes) {
   }
   
   container.innerHTML = reportes.map(reporte => `
-    <div class="reporte-card" onclick="verDetalle(${reporte.id})">
+    <div class="reporte-card" ondblclick="verDetalle(${reporte.id})">
       <div class="reporte-header">
         <div class="reporte-vehiculo">🚗 ${reporte.numero_vehiculo}</div>
         <div class="reporte-estado estado-${reporte.estado.replace(/ /g, '-').replace(/Á/g, 'A').replace(/É/g, 'E').replace(/Í/g, 'I').replace(/Ó/g, 'O').replace(/Ú/g, 'U')}">

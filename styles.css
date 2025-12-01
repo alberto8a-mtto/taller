@@ -387,7 +387,7 @@ body {
 }
 
 .reporte-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
   border-left-color: var(--brand-red-dark);
 }
