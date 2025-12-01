@@ -3,8 +3,13 @@
 // ========================================
 
 let updateInterval;
+let rotationInterval;
 const REFRESH_INTERVAL = 10000; // 10 segundos
+const ROTATION_INTERVAL = 5000; // 5 segundos para rotar vehículos
 const STORAGE_KEY = 'gestion_taller_reportes';
+const VEHICULOS_POR_PAGINA = 6; // Cantidad de vehículos a mostrar por vez
+let paginaActual = 0;
+let todosLosVehiculos = [];
 
 // ========== INICIALIZACIÓN ==========
 document.addEventListener('DOMContentLoaded', () => {
@@ -17,6 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Actualizar datos inmediatamente y cada 10 segundos
   cargarDatosDashboard();
   updateInterval = setInterval(cargarDatosDashboard, REFRESH_INTERVAL);
+  
+  // Rotar vehículos cada 5 segundos
+  rotationInterval = setInterval(rotarVehiculos, ROTATION_INTERVAL);
 });
 
 // ========== RELOJ ==========
@@ -40,22 +48,67 @@ function cargarDatosDashboard() {
     // Filtrar vehículos en proceso (no en SEGUIMIENTO)
     const vehiculosEnProceso = reportes.filter(r => r.estado !== 'SEGUIMIENTO');
     
-    // Actualizar contador
-    document.getElementById('countBadge').textContent = vehiculosEnProceso.length;
+    // Mezclar aleatoriamente los vehículos
+    todosLosVehiculos = mezclarArray(vehiculosEnProceso);
     
-    // Mostrar vehículos
-    mostrarVehiculos(vehiculosEnProceso);
+    // Actualizar contador total
+    document.getElementById('countBadge').textContent = todosLosVehiculos.length;
+    
+    // Reiniciar página actual
+    paginaActual = 0;
+    
+    // Mostrar primera página
+    mostrarPaginaActual();
     
     // Animación de actualización
     const indicator = document.getElementById('updateIndicator');
     indicator.style.opacity = '0.5';
     setTimeout(() => { indicator.style.opacity = '1'; }, 200);
     
-    console.log('✅ Dashboard actualizado:', vehiculosEnProceso.length, 'vehículos');
+    console.log('✅ Dashboard actualizado:', todosLosVehiculos.length, 'vehículos');
   } catch (error) {
     console.error('Error al cargar datos:', error);
     mostrarError();
   }
+}
+
+// ========== MEZCLAR ARRAY ALEATORIAMENTE ==========
+function mezclarArray(array) {
+  const nuevoArray = [...array];
+  for (let i = nuevoArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [nuevoArray[i], nuevoArray[j]] = [nuevoArray[j], nuevoArray[i]];
+  }
+  return nuevoArray;
+}
+
+// ========== ROTAR VEHÍCULOS ==========
+function rotarVehiculos() {
+  if (todosLosVehiculos.length <= VEHICULOS_POR_PAGINA) {
+    // Si hay menos vehículos que el límite, no rotar
+    return;
+  }
+  
+  // Avanzar a la siguiente página
+  paginaActual++;
+  
+  // Si llegamos al final, volver al inicio y remezclar
+  const totalPaginas = Math.ceil(todosLosVehiculos.length / VEHICULOS_POR_PAGINA);
+  if (paginaActual >= totalPaginas) {
+    paginaActual = 0;
+    todosLosVehiculos = mezclarArray(todosLosVehiculos);
+  }
+  
+  mostrarPaginaActual();
+}
+
+// ========== MOSTRAR PÁGINA ACTUAL ==========
+function mostrarPaginaActual() {
+  const inicio = paginaActual * VEHICULOS_POR_PAGINA;
+  const fin = inicio + VEHICULOS_POR_PAGINA;
+  const vehiculosPagina = todosLosVehiculos.slice(inicio, fin);
+  
+  mostrarVehiculos(vehiculosPagina);
 }
 
 // ========== MOSTRAR VEHÍCULOS ==========
@@ -71,9 +124,6 @@ function mostrarVehiculos(vehiculos) {
     `;
     return;
   }
-  
-  // Ordenar por fecha de actualización (más recientes primero)
-  vehiculos.sort((a, b) => new Date(b.fecha_actualizacion) - new Date(a.fecha_actualizacion));
   
   container.innerHTML = vehiculos.map(vehiculo => `
     <div class="vehicle-card estado-${normalizeEstado(vehiculo.estado)}">
@@ -183,10 +233,12 @@ function mostrarError() {
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     clearInterval(updateInterval);
+    clearInterval(rotationInterval);
     console.log('⏸️ Dashboard pausado');
   } else {
     cargarDatosDashboard();
     updateInterval = setInterval(cargarDatosDashboard, REFRESH_INTERVAL);
+    rotationInterval = setInterval(rotarVehiculos, ROTATION_INTERVAL);
     console.log('▶️ Dashboard reanudado');
   }
 });
