@@ -338,6 +338,15 @@ function mostrarModalDetalle(reporte) {
       </div>
     </div>
     
+    ${reporte.analisis ? `
+      <div class="detalle-section">
+        <h3>Análisis Inicial</h3>
+        <div class="info-row">
+          <div class="info-value">${reporte.analisis}</div>
+        </div>
+      </div>
+    ` : ''}
+    
     ${reporte.diagnostico ? `
       <div class="detalle-section">
         <h3>Diagnóstico</h3>
@@ -372,7 +381,7 @@ function mostrarModalDetalle(reporte) {
 function generarFormularioActualizacion(reporte) {
   const siguientesEstados = obtenerSiguientesEstados(reporte.estado);
   
-  // Si el estado actual es REPORTE, mostrar primero el selector de técnico
+  // Si el estado actual es REPORTE, mostrar formulario completo de asignación y análisis
   if (reporte.estado === 'REPORTE') {
     return `
       <form id="formActualizar" onsubmit="event.preventDefault(); actualizarReporte();">
@@ -385,13 +394,18 @@ function generarFormularioActualizacion(reporte) {
         </div>
         
         <div class="form-group">
+          <label>Análisis Inicial:</label>
+          <textarea id="analisisInicial" rows="4" placeholder="Describe el análisis realizado al vehículo..."></textarea>
+        </div>
+        
+        <div class="form-group">
           <label>Notas:</label>
           <textarea id="notas" rows="2" placeholder="Notas adicionales..."></textarea>
         </div>
         
-        <input type="hidden" id="nuevoEstado" value="TÉCNICO ASIGNADO">
+        <input type="hidden" id="nuevoEstado" value="ANÁLISIS">
         
-        <button type="submit" class="btn btn-primary">Asignar Técnico</button>
+        <button type="submit" class="btn btn-primary">Asignar Técnico y Registrar Análisis</button>
       </form>
     `;
   }
@@ -479,9 +493,16 @@ async function actualizarReporte() {
   const diagnostico = document.getElementById('diagnostico')?.value;
   const requiereReparacion = document.getElementById('requiereReparacion')?.value;
   const notas = document.getElementById('notas').value;
+  const analisisInicial = document.getElementById('analisisInicial')?.value;
   
   if (!nuevoEstado) {
     mostrarToast('Selecciona un nuevo estado', 'error');
+    return;
+  }
+  
+  // Validar técnico si es obligatorio (cuando viene de REPORTE)
+  if (reporteActual.estado === 'REPORTE' && !tecnico) {
+    mostrarToast('Debes seleccionar un técnico', 'error');
     return;
   }
   
@@ -501,6 +522,7 @@ async function actualizarReporte() {
   if (taller) reportes[index].taller_asignado = taller;
   if (diagnostico) reportes[index].diagnostico = diagnostico;
   if (requiereReparacion !== '') reportes[index].requiere_reparacion = parseInt(requiereReparacion);
+  if (analisisInicial) reportes[index].analisis = analisisInicial;
   if (notas) reportes[index].notas = notas;
   
   guardarReportes(reportes);
