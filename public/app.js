@@ -710,58 +710,9 @@ function configurarPWA() {
 
 // ========== PROVEEDORES/TALLERES ==========
 function cargarProveedoresPrueba() {
-  const proveedores = obtenerProveedores();
-  if (proveedores.length === 0) {
-    const proveedoresPrueba = [
-      {
-        id: 1,
-        nombre: 'Taller Mecánico Central',
-        tipo: 'TALLER',
-        especialidades: ['Motor', 'Transmisión', 'Electricidad'],
-        contacto: 'Carlos Ramírez',
-        telefono: '300-123-4567',
-        email: 'taller.central@email.com',
-        direccion: 'Calle 45 #23-10',
-        ciudad: 'Bogotá',
-        calificacion: 4.5,
-        notas: 'Especializado en vehículos pesados',
-        activo: true,
-        fecha_registro: new Date().toISOString()
-      },
-      {
-        id: 2,
-        nombre: 'AutoPartes Express',
-        tipo: 'PROVEEDOR',
-        especialidades: ['Repuestos', 'Accesorios'],
-        contacto: 'María González',
-        telefono: '310-987-6543',
-        email: 'ventas@autopartes.com',
-        direccion: 'Av. 68 #45-67',
-        ciudad: 'Bogotá',
-        calificacion: 4.8,
-        notas: 'Entrega inmediata, buenos precios',
-        activo: true,
-        fecha_registro: new Date().toISOString()
-      },
-      {
-        id: 3,
-        nombre: 'Taller Eléctrico Especializado',
-        tipo: 'TALLER',
-        especialidades: ['Electricidad', 'Electrónica', 'Aire Acondicionado'],
-        contacto: 'Jorge Medina',
-        telefono: '320-555-1234',
-        email: 'contacto@tallerelectrico.com',
-        direccion: 'Cra 30 #12-45',
-        ciudad: 'Bogotá',
-        calificacion: 4.3,
-        notas: 'Diagnóstico computarizado',
-        activo: true,
-        fecha_registro: new Date().toISOString()
-      }
-    ];
-    guardarProveedores(proveedoresPrueba);
-    console.log('✅ Proveedores de prueba cargados');
-  }
+  // Proveedores de prueba desactivados
+  // Los proveedores se agregarán manualmente desde el módulo de Proveedores
+  console.log('✅ Módulo de proveedores iniciado sin datos de prueba');
 }
 
 function cargarProveedores() {
