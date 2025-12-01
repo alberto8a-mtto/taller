@@ -33,6 +33,7 @@
       <button class="tab-btn" data-view="lista">Lista</button>
       <button class="tab-btn" data-view="proveedores">Proveedores</button>
       <button class="tab-btn" data-view="estadisticas">Estadísticas</button>
+      <button class="tab-btn" data-view="config" style="margin-left: auto; background: #28a745;">⚙️ Google Sheets</button>
     </nav>
 
     <!-- Vista: Nuevo Reporte -->
@@ -142,6 +143,14 @@
     </footer>
   </div>
 
+  <script src="google-sheets.js"></script>
   <script src="app.js"></script>
+  <script>
+    // Redirigir a configuración de Google Sheets
+    document.querySelector('[data-view="config"]')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = 'configurar-sheets.html';
+    });
+  </script>
 </body>
 </html>
