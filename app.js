@@ -1029,8 +1029,9 @@ async function cargarProveedores() {
   `;
 }
 
-function abrirFormularioProveedor(proveedorId = null) {
-  const proveedor = proveedorId ? obtenerProveedores().find(p => p.id === proveedorId) : null;
+async function abrirFormularioProveedor(proveedorId = null) {
+  const proveedores = await obtenerProveedores();
+  const proveedor = proveedorId ? proveedores.find(p => p.id === proveedorId) : null;
   const modal = document.getElementById('modalProveedor');
   const container = document.getElementById('formularioProveedor');
   
@@ -1039,15 +1040,140 @@ function abrirFormularioProveedor(proveedorId = null) {
     <form id="formProveedor">
       <input type="hidden" id="proveedor_id" value="${proveedor?.id || ''}">
       
-      <div class="form-group">
-        <label for="proveedor_nombre">Nombre *</label>
-        <input type="text" id="proveedor_nombre" value="${proveedor?.nombre || ''}" required>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="proveedor_nombre">Nombre *</label>
+          <input type="text" id="proveedor_nombre" value="${proveedor?.nombre || ''}" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="proveedor_categoria">Categoría *</label>
+          <select id="proveedor_categoria" required>
+            <option value="TALLER TIPO 1" ${proveedor?.categoria === 'TALLER TIPO 1' ? 'selected' : ''}>TALLER TIPO 1</option>
+            <option value="TALLER TIPO 2" ${proveedor?.categoria === 'TALLER TIPO 2' ? 'selected' : ''}>TALLER TIPO 2</option>
+            <option value="TALLER TIPO 3" ${proveedor?.categoria === 'TALLER TIPO 3' ? 'selected' : ''}>TALLER TIPO 3</option>
+            <option value="PROVEEDOR" ${proveedor?.categoria === 'PROVEEDOR' ? 'selected' : ''}>PROVEEDOR</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="proveedor_nit">NIT/CC *</label>
+          <input type="text" id="proveedor_nit" value="${proveedor?.nit || ''}" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="proveedor_tipo">Tipo Persona *</label>
+          <select id="proveedor_tipo" required>
+            <option value="JURIDICA" ${proveedor?.tipo === 'JURIDICA' ? 'selected' : ''}>JURÍDICA</option>
+            <option value="NATURAL" ${proveedor?.tipo === 'NATURAL' ? 'selected' : ''}>NATURAL</option>
+          </select>
+        </div>
       </div>
       
       <div class="form-group">
-        <label for="proveedor_tipo">Tipo *</label>
-        <select id="proveedor_tipo" required>
-          <option value="TALLER" ${proveedor?.tipo === 'TALLER' ? 'selected' : ''}>🏭 Taller</option>
+        <label for="proveedor_servicio">Servicio/Especialidad *</label>
+        <input type="text" id="proveedor_servicio" value="${proveedor?.servicio || ''}" 
+               placeholder="Ej: MECANICA EN GENERAL, FRENOS Y SUSPENSIÓN" required>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="proveedor_ciudad">Ciudad *</label>
+          <input type="text" id="proveedor_ciudad" value="${proveedor?.ciudad || ''}" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="proveedor_direccion">Dirección</label>
+          <input type="text" id="proveedor_direccion" value="${proveedor?.direccion || ''}">
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="proveedor_telefono">Teléfono</label>
+          <input type="tel" id="proveedor_telefono" value="${proveedor?.telefono || ''}">
+        </div>
+        
+        <div class="form-group">
+          <label for="proveedor_email">Email</label>
+          <input type="email" id="proveedor_email" value="${proveedor?.email || ''}">
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="proveedor_contacto">Persona de Contacto</label>
+          <input type="text" id="proveedor_contacto" value="${proveedor?.contacto || ''}">
+        </div>
+        
+        <div class="form-group">
+          <label for="proveedor_calificacion">Calificación (1-5)</label>
+          <input type="number" id="proveedor_calificacion" min="1" max="5" step="0.5" 
+                 value="${proveedor?.calificacion || 5}">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="proveedor_activo" ${proveedor?.activo !== false ? 'checked' : ''}>
+          Activo
+        </label>
+      </div>
+      
+      <div class="form-group">
+        <label for="proveedor_notas">Notas</label>
+        <textarea id="proveedor_notas" rows="3">${proveedor?.notas || ''}</textarea>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">💾 Guardar</button>
+        <button type="button" class="btn btn-secondary" onclick="cerrarModalProveedor()">❌ Cancelar</button>
+      </div>
+    </form>
+  `;
+  
+  document.getElementById('formProveedor').addEventListener('submit', guardarProveedor);
+  modal.style.display = 'block';
+}
+
+async function guardarProveedor(e) {
+  e.preventDefault();
+  
+  const id = document.getElementById('proveedor_id').value;
+  const proveedores = await obtenerProveedores();
+  
+  const proveedor = {
+    id: id ? parseInt(id) : (proveedores.length > 0 ? Math.max(...proveedores.map(p => p.id)) + 1 : 1),
+    nombre: document.getElementById('proveedor_nombre').value.trim(),
+    categoria: document.getElementById('proveedor_categoria').value,
+    nit: document.getElementById('proveedor_nit').value.trim(),
+    servicio: document.getElementById('proveedor_servicio').value.trim(),
+    ciudad: document.getElementById('proveedor_ciudad').value.trim(),
+    tipo: document.getElementById('proveedor_tipo').value,
+    direccion: document.getElementById('proveedor_direccion').value.trim(),
+    telefono: document.getElementById('proveedor_telefono').value.trim(),
+    email: document.getElementById('proveedor_email').value.trim(),
+    contacto: document.getElementById('proveedor_contacto').value.trim(),
+    calificacion: parseFloat(document.getElementById('proveedor_calificacion').value) || 5,
+    activo: document.getElementById('proveedor_activo').checked,
+    notas: document.getElementById('proveedor_notas').value.trim(),
+    fecha_registro: id ? proveedores.find(p => p.id === parseInt(id))?.fecha_registro : new Date().toISOString().split('T')[0]
+  };
+  
+  if (id) {
+    const index = proveedores.findIndex(p => p.id === parseInt(id));
+    proveedores[index] = proveedor;
+  } else {
+    proveedores.push(proveedor);
+  }
+  
+  await guardarProveedores(proveedores);
+  await cargarProveedores();
+  cerrarModalProveedor();
+  mostrarToast(id ? 'Proveedor actualizado correctamente' : 'Proveedor agregado correctamente', 'success');
+}
           <option value="PROVEEDOR" ${proveedor?.tipo === 'PROVEEDOR' ? 'selected' : ''}>📦 Proveedor de Repuestos</option>
         </select>
       </div>
