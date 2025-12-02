@@ -2,6 +2,12 @@
 let reporteActual = null;
 let deferredPrompt = null;
 
+// Caché para optimizar rendimiento
+let cacheReportes = null;
+let cacheProveedores = null;
+let ultimaActualizacion = null;
+const TIEMPO_CACHE = 5000; // 5 segundos
+
 // Lista de técnicos de la empresa
 const TECNICOS = [
   'ALEJANDRO GOMEZ',
@@ -18,21 +24,37 @@ const STORAGE_KEY = 'gestion_taller_reportes';
 const STORAGE_KEY_PROVEEDORES = 'gestion_taller_proveedores';
 
 // Obtener reportes (primero intenta Google Sheets, luego localStorage)
-async function obtenerReportes() {
+async function obtenerReportes(forzarRecarga = false) {
+  // Usar caché si está disponible y es reciente
+  const ahora = Date.now();
+  if (!forzarRecarga && cacheReportes && ultimaActualizacion && (ahora - ultimaActualizacion < TIEMPO_CACHE)) {
+    return cacheReportes;
+  }
+  
   if (typeof googleSheets !== 'undefined' && googleSheets.isConfigured()) {
     try {
-      return await googleSheets.leerReportes();
+      const reportes = await googleSheets.leerReportes();
+      cacheReportes = reportes;
+      ultimaActualizacion = ahora;
+      return reportes;
     } catch (error) {
       console.error('Error al leer desde Google Sheets, usando localStorage:', error);
     }
   }
   
   const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
+  const reportes = data ? JSON.parse(data) : [];
+  cacheReportes = reportes;
+  ultimaActualizacion = ahora;
+  return reportes;
 }
 
 // Guardar reportes (guarda en localStorage y Google Sheets)
 async function guardarReportes(reportes) {
+  // Actualizar caché inmediatamente
+  cacheReportes = reportes;
+  ultimaActualizacion = Date.now();
+  
   localStorage.setItem(STORAGE_KEY, JSON.stringify(reportes));
   
   if (typeof googleSheets !== 'undefined' && googleSheets.isConfigured()) {
@@ -46,21 +68,41 @@ async function guardarReportes(reportes) {
 }
 
 // Obtener proveedores
-async function obtenerProveedores() {
+async function obtenerProveedores(forzarRecarga = false) {
+  // Usar caché si está disponible y no se fuerza recarga
+  if (!forzarRecarga && cacheProveedores) {
+    return cacheProveedores;
+  }
+  
+  // Intentar cargar desde Google Sheets primero
   if (typeof googleSheets !== 'undefined' && googleSheets.isConfigured()) {
     try {
-      return await googleSheets.leerProveedores();
+      const proveedores = await googleSheets.leerProveedores();
+      if (proveedores && proveedores.length > 0) {
+        cacheProveedores = proveedores;
+        // Guardar en localStorage como respaldo
+        localStorage.setItem(STORAGE_KEY_PROVEEDORES, JSON.stringify(proveedores));
+        console.log(`✅ ${proveedores.length} proveedores cargados desde Google Sheets`);
+        return proveedores;
+      }
     } catch (error) {
       console.error('Error al leer proveedores desde Google Sheets:', error);
     }
   }
   
+  // Fallback a localStorage
   const data = localStorage.getItem(STORAGE_KEY_PROVEEDORES);
-  return data ? JSON.parse(data) : [];
+  const proveedores = data ? JSON.parse(data) : [];
+  cacheProveedores = proveedores;
+  console.log(`📦 ${proveedores.length} proveedores cargados desde localStorage`);
+  return proveedores;
 }
 
 // Guardar proveedores
 async function guardarProveedores(proveedores) {
+  // Actualizar caché inmediatamente
+  cacheProveedores = proveedores;
+  
   localStorage.setItem(STORAGE_KEY_PROVEEDORES, JSON.stringify(proveedores));
   
   if (typeof googleSheets !== 'undefined' && googleSheets.isConfigured()) {
@@ -172,7 +214,7 @@ async function crearReporte() {
   reportes.push(nuevoReporte);
   await guardarReportes(reportes);
   
-  mostrarToast('✅ Reporte creado exitosamente', 'success');
+  mostrarToast('Reporte creado exitosamente', 'success');
   document.getElementById('formNuevoReporte').reset();
   cambiarVista('lista');
   cargarReportes();
@@ -203,9 +245,9 @@ function mostrarReportes(reportes) {
   }
   
   container.innerHTML = reportes.map(reporte => `
-    <div class="reporte-card" ondblclick="verDetalle(${reporte.id})">
+    <div class="reporte-card" onclick="verDetalle(${reporte.id})" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
       <div class="reporte-header">
-        <div class="reporte-vehiculo">🚗 ${reporte.numero_vehiculo}</div>
+        <div class="reporte-vehiculo">Vehículo ${reporte.numero_vehiculo}</div>
         <div class="reporte-estado estado-${reporte.estado.replace(/ /g, '-').replace(/Á/g, 'A').replace(/É/g, 'E').replace(/Í/g, 'I').replace(/Ó/g, 'O').replace(/Ú/g, 'U')}">
           ${reporte.estado}
         </div>
@@ -213,9 +255,24 @@ function mostrarReportes(reportes) {
       <div class="reporte-descripcion">
         ${reporte.descripcion || 'Sin descripción'}
       </div>
-      <div class="reporte-footer">
-        <span>📅 ${formatearFecha(reporte.fecha_reporte)}</span>
-        ${reporte.tecnico_asignado ? `<span>👤 ${reporte.tecnico_asignado}</span>` : ''}
+      <div class="reporte-metadata">
+        <div class="metadata-item">
+          <span class="metadata-label">Fecha:</span>
+          <span class="metadata-value">${formatearFecha(reporte.fecha_reporte)}</span>
+        </div>
+        ${reporte.tecnico_asignado ? `
+        <div class="metadata-item">
+          <span class="metadata-label">Técnico:</span>
+          <span class="metadata-value">${reporte.tecnico_asignado}</span>
+        </div>` : ''}
+        ${reporte.taller_asignado ? `
+        <div class="metadata-item">
+          <span class="metadata-label">Taller:</span>
+          <span class="metadata-value">${reporte.taller_asignado}</span>
+        </div>` : ''}
+      </div>
+      <div class="reporte-action">
+        <button class="btn-ver-detalle">Ver Detalles</button>
       </div>
     </div>
   `).join('');
@@ -235,9 +292,12 @@ async function verDetalle(id) {
   mostrarModalDetalle(reporte);
 }
 
-function mostrarModalDetalle(reporte) {
+async function mostrarModalDetalle(reporte) {
   const modal = document.getElementById('modalDetalle');
   const detalle = document.getElementById('detalleReporte');
+  
+  // Generar el formulario de manera async
+  const formularioActualizacion = await generarFormularioActualizacion(reporte);
   
   detalle.innerHTML = `
     <h2>📋 Detalle del Reporte #${reporte.id}</h2>
@@ -299,7 +359,7 @@ function mostrarModalDetalle(reporte) {
         </div>
         <div class="info-row">
           <div class="info-label">Requiere Reparación:</div>
-          <div class="info-value">${reporte.requiere_reparacion ? '✅ Sí' : '❌ No'}</div>
+          <div class="info-value">${reporte.requiere_reparacion ? 'Sí' : 'No'}</div>
         </div>
       </div>
     ` : ''}
@@ -315,18 +375,29 @@ function mostrarModalDetalle(reporte) {
     
     <div class="detalle-section">
       <h3>Actualizar Estado</h3>
-      ${generarFormularioActualizacion(reporte)}
+      ${formularioActualizacion}
+    </div>
+    
+    <div class="detalle-section" style="border-top: 2px solid #dc3545; margin-top: 2rem; padding-top: 1rem;">
+      <h3 style="color: #dc3545;">Zona Peligrosa</h3>
+      <p style="color: var(--text-secondary); margin-bottom: 1rem;">Esta acción no se puede deshacer.</p>
+      <button type="button" class="btn" style="background: #dc3545; width: 100%;" onclick="confirmarEliminarReporte(${reporte.id})">
+        Eliminar Reporte
+      </button>
     </div>
   `;
   
   modal.style.display = 'block';
 }
 
-function generarFormularioActualizacion(reporte) {
+async function generarFormularioActualizacion(reporte) {
   const siguientesEstados = obtenerSiguientesEstados(reporte.estado);
   
   // Si el estado actual es REPORTE, mostrar formulario completo de asignación y análisis
   if (reporte.estado === 'REPORTE') {
+    // Cargar proveedores para el select
+    const proveedores = await obtenerProveedores();
+    
     return `
       <form id="formActualizar" onsubmit="event.preventDefault(); actualizarReporte();">
         <div class="form-group">
@@ -335,6 +406,17 @@ function generarFormularioActualizacion(reporte) {
             <option value="">-- Seleccionar Técnico --</option>
             ${TECNICOS.map(tecnico => `<option value="${tecnico}">${tecnico}</option>`).join('')}
           </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Proveedor/Taller Asignado:</label>
+          <select id="tallerAsignado">
+            <option value="">-- Seleccionar Proveedor/Taller --</option>
+            ${proveedores.map(prov => `<option value="${prov.nombre}">${prov.nombre}</option>`).join('')}
+          </select>
+          <small style="color: var(--text-secondary); display: block; margin-top: 0.5rem;">
+            Opcional: Puedes asignarlo ahora o más tarde
+          </small>
         </div>
         
         <div class="form-group">
@@ -355,6 +437,9 @@ function generarFormularioActualizacion(reporte) {
   }
   
   // Para otros estados, mostrar el formulario normal
+  // Cargar proveedores para el select
+  const proveedores = await obtenerProveedores();
+  
   return `
     <form id="formActualizar" onsubmit="event.preventDefault(); actualizarReporte();">
       <div class="form-group">
@@ -373,9 +458,15 @@ function generarFormularioActualizacion(reporte) {
         </select>
       </div>
       
-      <div class="form-group" id="campoTaller" style="display: none;">
-        <label>Taller Asignado:</label>
-        <input type="text" id="tallerAsignado" placeholder="Nombre del taller">
+      <div class="form-group">
+        <label>Proveedor/Taller Asignado:</label>
+        <select id="tallerAsignado">
+          <option value="">-- Seleccionar Proveedor/Taller --</option>
+          ${proveedores.map(prov => `<option value="${prov.nombre}">${prov.nombre}</option>`).join('')}
+        </select>
+        <small style="color: var(--text-secondary); display: block; margin-top: 0.5rem;">
+          Puedes cambiar el taller asignado en cualquier momento
+        </small>
       </div>
       
       <div class="form-group" id="campoDiagnostico" style="display: none;">
@@ -401,12 +492,16 @@ function generarFormularioActualizacion(reporte) {
     </form>
     
     <script>
+      // Preseleccionar el taller actual si existe
+      const tallerSelect = document.getElementById('tallerAsignado');
+      if (tallerSelect && '${reporte.taller_asignado || ''}') {
+        tallerSelect.value = '${reporte.taller_asignado || ''}';
+      }
+      
       document.getElementById('nuevoEstado').addEventListener('change', function() {
         const estado = this.value;
         document.getElementById('campoTecnico').style.display = 
           estado === 'TÉCNICO ASIGNADO' ? 'block' : 'none';
-        document.getElementById('campoTaller').style.display = 
-          estado === 'TALLER' ? 'block' : 'none';
         document.getElementById('campoDiagnostico').style.display = 
           estado === 'DIAGNÓSTICO' ? 'block' : 'none';
         document.getElementById('campoReparacion').style.display = 
@@ -471,7 +566,7 @@ async function actualizarReporte() {
   
   await guardarReportes(reportes);
   
-  mostrarToast('✅ Reporte actualizado exitosamente', 'success');
+  mostrarToast('Reporte actualizado exitosamente', 'success');
   cerrarModal();
   cargarReportes();
   cargarEstadisticas();
@@ -575,6 +670,67 @@ async function cargarEstadisticas() {
     `;
 }
 
+// ========== ELIMINAR REPORTE ==========
+function confirmarEliminarReporte(reporteId) {
+  const confirmacion = confirm(
+    '⚠️ ATENCIÓN: Estás a punto de eliminar este reporte.\n\n' +
+    '¿Estás COMPLETAMENTE SEGURO de que deseas eliminar este reporte?\n\n' +
+    'Esta acción NO SE PUEDE DESHACER.'
+  );
+  
+  if (!confirmacion) {
+    mostrarToast('Operación cancelada', 'info');
+    return;
+  }
+  
+  // Segunda confirmación
+  const segundaConfirmacion = confirm(
+    '🚨 ÚLTIMA CONFIRMACIÓN\n\n' +
+    'Esta es tu última oportunidad para cancelar.\n\n' +
+    '¿Confirmas que deseas ELIMINAR PERMANENTEMENTE este reporte?\n\n' +
+    'Presiona OK para eliminar o Cancelar para mantenerlo.'
+  );
+  
+  if (segundaConfirmacion) {
+    eliminarReporte(reporteId);
+  } else {
+    mostrarToast('Operación cancelada', 'info');
+  }
+}
+
+async function eliminarReporte(reporteId) {
+  try {
+    const reportes = await obtenerReportes();
+    const reporteIndex = reportes.findIndex(r => r.id === reporteId);
+    
+    if (reporteIndex === -1) {
+      mostrarToast('Reporte no encontrado', 'error');
+      return;
+    }
+    
+    const reporteEliminado = reportes[reporteIndex];
+    
+    // Eliminar el reporte
+    reportes.splice(reporteIndex, 1);
+    
+    // Guardar cambios
+    await guardarReportes(reportes);
+    
+    // Cerrar modal y actualizar vistas
+    cerrarModal();
+    cargarReportes();
+    cargarEstadisticas();
+    
+    mostrarToast(
+      `Reporte #${reporteEliminado.id} (Vehículo ${reporteEliminado.numero_vehiculo}) eliminado correctamente`,
+      'success'
+    );
+  } catch (error) {
+    console.error('Error al eliminar reporte:', error);
+    mostrarToast('Error al eliminar el reporte', 'error');
+  }
+}
+
 // ========== MODAL ==========
 function cerrarModal() {
   document.getElementById('modalDetalle').style.display = 'none';
@@ -644,7 +800,7 @@ function configurarPWA() {
     const { outcome } = await deferredPrompt.userChoice;
     
     if (outcome === 'accepted') {
-      mostrarToast('✅ App instalada exitosamente', 'success');
+      mostrarToast('App instalada exitosamente', 'success');
     }
     
     deferredPrompt = null;
@@ -653,10 +809,19 @@ function configurarPWA() {
 }
 
 // ========== PROVEEDORES/TALLERES ==========
-function cargarProveedoresPrueba() {
-  // Proveedores de prueba desactivados
-  // Los proveedores se agregarán manualmente desde el módulo de Proveedores
-  console.log('✅ Módulo de proveedores iniciado sin datos de prueba');
+async function cargarProveedoresPrueba() {
+  // Sincronizar proveedores desde Google Sheets al iniciar
+  console.log('🔄 Sincronizando proveedores desde Google Sheets...');
+  try {
+    const proveedores = await obtenerProveedores(true); // Forzar recarga
+    if (proveedores && proveedores.length > 0) {
+      console.log(`✅ ${proveedores.length} proveedores sincronizados exitosamente`);
+    } else {
+      console.log('⚠️ No se encontraron proveedores en Google Sheets');
+    }
+  } catch (error) {
+    console.error('❌ Error al sincronizar proveedores:', error);
+  }
 }
 
 async function cargarProveedores() {
@@ -668,73 +833,72 @@ async function cargarProveedores() {
     return;
   }
   
-  // Ordenar por calificación y nombre
-  proveedores.sort((a, b) => {
-    if (a.activo !== b.activo) return b.activo - a.activo;
-    if (b.calificacion !== a.calificacion) return b.calificacion - a.calificacion;
-    return a.nombre.localeCompare(b.nombre);
-  });
+  // Ordenar por nombre
+  proveedores.sort((a, b) => a.nombre.localeCompare(b.nombre));
   
-  container.innerHTML = proveedores.map(proveedor => `
-    <div class="proveedor-card ${!proveedor.activo ? 'inactivo' : ''}">
-      <div class="proveedor-header">
-        <div>
-          <h3>${proveedor.tipo === 'TALLER' ? '🏭' : '📦'} ${proveedor.nombre}</h3>
-          <span class="badge badge-${proveedor.tipo.toLowerCase()}">${proveedor.tipo}</span>
-          ${!proveedor.activo ? '<span class="badge badge-inactive">INACTIVO</span>' : ''}
-        </div>
-        <div class="proveedor-calificacion">
-          ${'⭐'.repeat(Math.round(proveedor.calificacion))}
-          <span class="calificacion-num">${proveedor.calificacion.toFixed(1)}</span>
-        </div>
-      </div>
-      
-      <div class="proveedor-info">
-        <div class="info-item">
-          <strong>📋 Especialidades:</strong>
-          <span>${proveedor.especialidades.join(', ')}</span>
-        </div>
-        
-        <div class="info-item">
-          <strong>👤 Contacto:</strong>
-          <span>${proveedor.contacto}</span>
-        </div>
-        
-        <div class="info-item">
-          <strong>📞 Teléfono:</strong>
-          <span><a href="tel:${proveedor.telefono}">${proveedor.telefono}</a></span>
-        </div>
-        
-        ${proveedor.email ? `
-          <div class="info-item">
-            <strong>📧 Email:</strong>
-            <span><a href="mailto:${proveedor.email}">${proveedor.email}</a></span>
-          </div>
-        ` : ''}
-        
-        <div class="info-item">
-          <strong>📍 Dirección:</strong>
-          <span>${proveedor.direccion}, ${proveedor.ciudad}</span>
-        </div>
-        
-        ${proveedor.notas ? `
-          <div class="info-item">
-            <strong>📝 Notas:</strong>
-            <span>${proveedor.notas}</span>
-          </div>
-        ` : ''}
-      </div>
-      
-      <div class="proveedor-actions">
-        <button class="btn btn-sm btn-secondary" onclick="editarProveedor(${proveedor.id})">✏️ Editar</button>
-        <button class="btn btn-sm ${proveedor.activo ? 'btn-warning' : 'btn-success'}" 
-                onclick="toggleActivoProveedor(${proveedor.id})">
-          ${proveedor.activo ? '🚫 Desactivar' : '✅ Activar'}
-        </button>
-        <button class="btn btn-sm btn-danger" onclick="eliminarProveedor(${proveedor.id})">🗑️ Eliminar</button>
-      </div>
+  // Vista compacta en tabla
+  container.innerHTML = `
+    <div class="proveedores-table-container">
+      <table class="proveedores-table">
+        <thead>
+          <tr>
+            <th>Proveedor</th>
+            <th>Categoría</th>
+            <th>Servicio</th>
+            <th>NIT/CC</th>
+            <th>Ciudad</th>
+            <th>Contacto</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${proveedores.map(proveedor => {
+            const nombre = proveedor.nombre || '';
+            const tipo = proveedor.tipo || proveedor.categoria || 'PROVEEDOR';
+            const categoria = proveedor.categoria || tipo;
+            const servicio = proveedor.servicio || proveedor.especialidades?.join(', ') || '-';
+            const contacto = proveedor.contacto || '-';
+            const telefono = proveedor.telefono || '-';
+            const email = proveedor.email || '-';
+            const ciudad = proveedor.ciudad || '-';
+            const nit = proveedor.nit || '-';
+            const activo = proveedor.activo !== false;
+            
+            return `
+              <tr class="${!activo ? 'row-inactive' : ''}" onclick="editarProveedor(${proveedor.id})" style="cursor: pointer;">
+                <td>
+                  <div class="proveedor-nombre">
+                    <span class="proveedor-icon">${tipo.includes('TALLER') ? '🏭' : '📦'}</span>
+                    <strong>${nombre}</strong>
+                    ${!activo ? '<span class="badge-mini inactive">INACTIVO</span>' : ''}
+                  </div>
+                </td>
+                <td>
+                  <span class="categoria-badge">${categoria}</span>
+                </td>
+                <td class="servicio-cell">${servicio}</td>
+                <td>${nit}</td>
+                <td>${ciudad}</td>
+                <td class="contacto-cell">
+                  ${telefono !== '-' ? `<div><a href="tel:${telefono}" onclick="event.stopPropagation();">📞 ${telefono}</a></div>` : ''}
+                  ${email !== '-' ? `<div><a href="mailto:${email}" onclick="event.stopPropagation();">📧 ${email}</a></div>` : ''}
+                  ${contacto !== '-' && contacto !== email && contacto !== telefono ? `<div>${contacto}</div>` : ''}
+                </td>
+                <td class="actions-cell" onclick="event.stopPropagation();">
+                  <button class="btn-icon" onclick="editarProveedor(${proveedor.id})" title="Editar">
+                    ✏️
+                  </button>
+                  <button class="btn-icon btn-danger" onclick="eliminarProveedor(${proveedor.id})" title="Eliminar">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
     </div>
-  `).join('');
+  `;
 }
 
 function abrirFormularioProveedor(proveedorId = null) {

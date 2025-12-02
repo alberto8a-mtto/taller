@@ -33,14 +33,14 @@
       <button class="tab-btn" data-view="lista">Lista</button>
       <button class="tab-btn" data-view="proveedores">Proveedores</button>
       <button class="tab-btn" data-view="estadisticas">Estadísticas</button>
-      <button class="tab-btn" data-view="config" style="margin-left: auto; background: #28a745;">⚙️ Google Sheets</button>
+      <button class="tab-btn" data-view="config" style="margin-left: auto; background: #28a745; display: none;">Google Sheets</button>
     </nav>
 
     <!-- Vista: Nuevo Reporte -->
     <div id="view-nuevo" class="view active">
       <div class="container">
         <div class="card">
-          <h2>📝 Nuevo Reporte</h2>
+          <h2>Nuevo Reporte</h2>
           <form id="formNuevoReporte">
             <div class="form-group">
               <label for="numero_vehiculo">Número de Vehículo *</label>
@@ -62,7 +62,7 @@
         </div>
 
         <div class="card">
-          <h2>🔍 Buscar Reportes de un Vehículo</h2>
+          <h2>Buscar Reportes de un Vehículo</h2>
           <div class="form-group">
             <input type="text" id="buscarVehiculo" placeholder="Número de vehículo">
             <button onclick="buscarPorVehiculo()" class="btn btn-secondary">Buscar</button>
@@ -98,7 +98,7 @@
     <div id="view-estadisticas" class="view">
       <div class="container">
         <div class="card">
-          <h2>📊 Estadísticas</h2>
+          <h2>Estadísticas</h2>
           <div id="estadisticasContent"></div>
         </div>
       </div>
@@ -108,10 +108,15 @@
     <div id="view-proveedores" class="view">
       <div class="container">
         <div class="card">
-          <h2>🏭 Proveedores y Talleres</h2>
-          <button class="btn btn-primary" onclick="abrirFormularioProveedor()">
-            ➕ Agregar Proveedor
-          </button>
+          <h2>Proveedores y Talleres</h2>
+          <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="abrirFormularioProveedor()">
+              Agregar Proveedor
+            </button>
+            <button class="btn btn-success" onclick="window.location.href='importar-proveedores.html'">
+              Importar desde CSV
+            </button>
+          </div>
           <div id="listaProveedores" class="list-container"></div>
         </div>
       </div>

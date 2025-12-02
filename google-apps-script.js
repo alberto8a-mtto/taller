@@ -109,6 +109,67 @@ class GoogleAppsScriptDB {
     return data ? JSON.parse(data) : [];
   }
 
+  // ========== PROVEEDORES ==========
+  async leerProveedores() {
+    if (!this.isConfigured()) {
+      console.warn('⚠️ Google Apps Script no configurado, usando localStorage');
+      return this.leerLocalStorage('gestion_taller_proveedores');
+    }
+
+    try {
+      const url = `${this.scriptUrl}?action=leerProveedores`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error desconocido');
+      }
+
+      console.log('✅ Proveedores leídos desde Google Sheets:', result.data.length);
+      return result.data;
+
+    } catch (error) {
+      console.error('❌ Error al leer proveedores de Google Sheets:', error);
+      console.warn('⚠️ Usando datos de localStorage');
+      return this.leerLocalStorage('gestion_taller_proveedores');
+    }
+  }
+
+  async guardarProveedores(proveedores) {
+    if (!this.isConfigured() || !this.syncEnabled) {
+      console.warn('⚠️ Sincronización deshabilitada o no configurada');
+      return false;
+    }
+
+    try {
+      const url = `${this.scriptUrl}?action=guardarProveedores&datos=${encodeURIComponent(JSON.stringify(proveedores))}`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error al guardar proveedores');
+      }
+
+      console.log('✅ Proveedores guardados en Google Sheets:', proveedores.length);
+      return true;
+
+    } catch (error) {
+      console.error('❌ Error al guardar proveedores en Google Sheets:', error);
+      console.warn('⚠️ Proveedores guardados solo en localStorage');
+      return false;
+    }
+  }
+
   // Verificar conexión
   async verificarConexion() {
     if (!this.isConfigured()) {
