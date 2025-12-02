@@ -810,17 +810,100 @@ function configurarPWA() {
 
 // ========== PROVEEDORES/TALLERES ==========
 async function cargarProveedoresPrueba() {
-  // Sincronizar proveedores desde Google Sheets al iniciar
-  console.log('🔄 Sincronizando proveedores desde Google Sheets...');
-  try {
-    const proveedores = await obtenerProveedores(true); // Forzar recarga
-    if (proveedores && proveedores.length > 0) {
-      console.log(`✅ ${proveedores.length} proveedores sincronizados exitosamente`);
-    } else {
-      console.log('⚠️ No se encontraron proveedores en Google Sheets');
+  // Verificar si ya hay proveedores en localStorage
+  const proveedoresExistentes = localStorage.getItem(STORAGE_KEY_PROVEEDORES);
+  
+  if (!proveedoresExistentes || JSON.parse(proveedoresExistentes).length === 0) {
+    console.log('📥 Cargando base de datos inicial de proveedores...');
+    
+    // Base de datos de 62 proveedores
+    const proveedoresIniciales = [
+      {id: 1, nombre: "DIESEL ANDINO", categoria: "TALLER TIPO 1", nit: "811.006.409", servicio: "MECANICA EN GENERAL", ciudad: "MUNICIPIOS DEL AMVA", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 2, nombre: "SUPERPOLO S.A.S", categoria: "TALLER TIPO 1", nit: "830.092.963", servicio: "CARROCERIA", ciudad: "MEDELLIN CENTRO", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 3, nombre: "AUTOAMERICA", categoria: "TALLER TIPO 1", nit: "890.904.615", servicio: "MECANICA EN GENERAL", ciudad: "CARIBE ZONA", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 4, nombre: "SCANIA COLOMBIA S.A.S", categoria: "TALLER TIPO 1", nit: "900.353.873", servicio: "MECANICA EN GENERAL", ciudad: "MUNICIPIOS DEL AMVA", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 5, nombre: "TALLER LABORATORIO INYER DIESEL", categoria: "TALLER TIPO 2", nit: "79.508.565", servicio: "LABORATORIO", ciudad: "MEDELLIN CENTRO", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 6, nombre: "YAMERSON MELO FONSECA", categoria: "TALLER TIPO 2", nit: "79.807.095", servicio: "SISTEMA DE INYECCION", ciudad: "BOGOTA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 7, nombre: "EURO TRUCK BUSES DIAZ", categoria: "TALLER TIPO 2", nit: "700.258.353", servicio: "MECANICA EN GENERAL", ciudad: "CARIBE ZONA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 8, nombre: "TECNI ISUZU", categoria: "TALLER TIPO 2", nit: "830.007.802", servicio: "MECANICA EN GENERAL", ciudad: "BOGOTA", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 9, nombre: "IVESUR COLOMBIA S.A.", categoria: "TALLER TIPO 2", nit: "900.081.357", servicio: "CDA", ciudad: "MEDELLIN CENTRO", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 10, nombre: "AUTOBUSES ICC", categoria: "TALLER TIPO 2", nit: "900.366.983", servicio: "CARROCERIA", ciudad: "COPACABANA", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 11, nombre: "JGB MEDELLIN S.A.S", categoria: "TALLER TIPO 2", nit: "900.387.453", servicio: "CARROCERIA", ciudad: "CARIBE ZONA", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 12, nombre: "COMPRESORES CEGAUTO SAS", categoria: "TALLER TIPO 2", nit: "900.734.495", servicio: "SISTEMA AIRE COMPRIMIDO", ciudad: "MEDELLIN CENTRO", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 13, nombre: "TALLER TECNICAR S.A.S.", categoria: "TALLER TIPO 2", nit: "901.078.916", servicio: "CARROCERIA", ciudad: "BOGOTA", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 14, nombre: "DISGNOSTICENTRO TECNODIESEL", categoria: "TALLER TIPO 2", nit: "901.173.624", servicio: "LABORATORIO INYECCION", ciudad: "ITAGUI", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 15, nombre: "REPARACIONES JASS S.A.S", categoria: "TALLER TIPO 2", nit: "901.184.549", servicio: "CARROCERIA", ciudad: "CARIBE ZONA", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 16, nombre: "ACOPLES ALEX JCV SAS", categoria: "TALLER TIPO 2", nit: "901.269.728", servicio: "TORNO", ciudad: "CARIBE ZONA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 17, nombre: "DIRECCIONES HIDRAULICAS EL BUFALO SAS", categoria: "TALLER TIPO 2", nit: "901.353.584", servicio: "SISTEMA DE DIRECCION", ciudad: "MEDELLIN CENTRO", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 18, nombre: "CENTRO DE SERVICIOS GAMA ALTA S.A.S", categoria: "TALLER TIPO 2", nit: "901.388.533", servicio: "CARROCERIA", ciudad: "CARIBE R8A", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 19, nombre: "AUTOBUSES COL", categoria: "TALLER TIPO 2", nit: "1.020.469.334", servicio: "CARROCERIA", ciudad: "CARIBE ZONA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 20, nombre: "JOHNY DIESEL", categoria: "TALLER TIPO 2", nit: "1.152.698.067", servicio: "MOTORES", ciudad: "MEDELLIN CENTRO", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 21, nombre: "GIOVANNI DANIEL BOHORQUEZ COLMENARES", categoria: "TALLER TIPO 3", nit: "894.525", servicio: "AIRE ACONDICIONADO", ciudad: "CARIBE ZONA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 22, nombre: "ALCIDES MEJIA", categoria: "TALLER TIPO 3", nit: "8.309.922", servicio: "FRENOS Y SUSPENSIÓN", ciudad: "AMAGA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 23, nombre: "IVAN RENDON", categoria: "TALLER TIPO 3", nit: "8.757.153", servicio: "CARROCERIA", ciudad: "MEDELLIN CENTRO", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 24, nombre: "ANDRES MURILLO", categoria: "TALLER TIPO 3", nit: "11.797.868", servicio: "MOTORES", ciudad: "CARIBE ZONA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 25, nombre: "THERMO BUS", categoria: "TALLER TIPO 3", nit: "13.513.886", servicio: "AIRE ACONDICIONADO", ciudad: "BOGOTA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 26, nombre: "DEIBYS ANDRES URREGO ROLDAN", categoria: "TALLER TIPO 3", nit: "15.489.840", servicio: "SISTEMA ELECTRICO", ciudad: "URRAO", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 27, nombre: "AICARDO URAN", categoria: "TALLER TIPO 3", nit: "15.490.588", servicio: "FRENOS Y SUSPENSIÓN", ciudad: "URRAO", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 28, nombre: "SERGIO DE JESUS GUTIERREZ ECHEVERRI", categoria: "TALLER TIPO 3", nit: "15.526.110", servicio: "CARROCERIA", ciudad: "JARDIN", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 29, nombre: "FRENOS Y MUELLES NANO", categoria: "TALLER TIPO 3", nit: "43.923.387", servicio: "FRENOS Y SUSPENSIÓN", ciudad: "CARIBE ZONA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 30, nombre: "ALFREDO RESTREPO", categoria: "TALLER TIPO 3", nit: "70.124.874", servicio: "CAJAS Y DIFERENCIALES", ciudad: "CARIBE ZONA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 31, nombre: "TALLER EURIPIDES", categoria: "TALLER TIPO 3", nit: "70.166.298", servicio: "FRENOS Y SUSPENSIÓN", ciudad: "MUNICIPIOS DEL AMVA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 32, nombre: "TALLER ALEXANDER JARAMILLO - EL ZORRO", categoria: "TALLER TIPO 3", nit: "71.367.798", servicio: "MOTORES", ciudad: "MEDELLIN CENTRO", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 33, nombre: "ELKIN JAVIER FRANCO VERGARA", categoria: "TALLER TIPO 3", nit: "71.526.467", servicio: "MECANICA EN GENERAL", ciudad: "CALDAS", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 34, nombre: "ROGELIO TAPIAS HENAO", categoria: "TALLER TIPO 3", nit: "71.593.514", servicio: "MOTORES Y CAJAS", ciudad: "MEDELLIN CENTRO", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 35, nombre: "LUIS ENRIQUE AGRESOTH OVIEDO", categoria: "TALLER TIPO 3", nit: "72.173.495", servicio: "AIRE ACONDICIONADO", ciudad: "CARIBE R8A", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 36, nombre: "THERMO AIR 2", categoria: "TALLER TIPO 3", nit: "72.295.162", servicio: "AIRE ACONDICIONADO", ciudad: "BARRANQUILLA", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 37, nombre: "CARLOS ORLANDO MUÑOZ", categoria: "TALLER TIPO 3", nit: "79.828.305", servicio: "", ciudad: "", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 38, nombre: "QUINTILIANO MARQUEZ", categoria: "TALLER TIPO 3", nit: "80.420.445", servicio: "MECANICA MOTOR", ciudad: "BOGOTA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 39, nombre: "EVELIO RIVERA MELO", categoria: "TALLER TIPO 3", nit: "93.364.999", servicio: "AIRE ACONDICIONADO", ciudad: "CARIBE ZONA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 40, nombre: "ALEXANDER RIVERA MELO", categoria: "TALLER TIPO 3", nit: "93.376.804", servicio: "SISTEMA ELECTRICO", ciudad: "CARIBE R8A", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 41, nombre: "ANIBAL RENDON", categoria: "TALLER TIPO 3", nit: "98.493.908", servicio: "RADIADORES", ciudad: "MEDELLIN CENTRO", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 42, nombre: "MARIO ALFONSO RESTREPO PEREZ", categoria: "TALLER TIPO 3", nit: "98.521.361", servicio: "MOTORES", ciudad: "CARIBE R8A", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 43, nombre: "FRANCISCO MARIN", categoria: "TALLER TIPO 3", nit: "98.580.761", servicio: "CARROCERIA", ciudad: "MEDELLIN CENTRO", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 44, nombre: "PABLO HERNAN GOMEZ HERNANDEZ", categoria: "TALLER TIPO 3", nit: "98.582.588", servicio: "FRENOS Y SUSPENSIÓN", ciudad: "CARIBE R8A", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 45, nombre: "LUIS GUILLERMO FUENTES PAREJA", categoria: "TALLER TIPO 3", nit: "98.611.783", servicio: "MOTORES-CAJAS- DIFERENCIALES", ciudad: "CARIBE R8A", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 46, nombre: "LUIS G. BLANCO HERNANDEZ", categoria: "TALLER TIPO 3", nit: "98.687.307", servicio: "AIRE ACONDICIONADO", ciudad: "SINCELEJO", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 47, nombre: "LUIS EFRAIN CADENA", categoria: "TALLER TIPO 3", nit: "803.686.333", servicio: "SISTEMA AIRE COMPRIMIDO", ciudad: "CARIBE R8A", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 48, nombre: "TRANSPORTES FRIOS", categoria: "TALLER TIPO 3", nit: "805.031.256", servicio: "AIRE ACONDICIONADO", ciudad: "CARIBE ZONA", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 49, nombre: "VIDRIOS Y ACCESORIOS DE BOGOTA", categoria: "TALLER TIPO 3", nit: "830.144.337", servicio: "VIDRIOS", ciudad: "BOGOTA", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 50, nombre: "DELTA FRENOS Y ACCESORIOS S.A.S", categoria: "TALLER TIPO 3", nit: "900.120.933", servicio: "FRENOS Y SUSPENSIÓN", ciudad: "CARIBE ZONA", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 51, nombre: "TUTO FRENOS Y MUELLES SAS", categoria: "TALLER TIPO 3", nit: "901.078.517", servicio: "FRENOS Y SUSPENSIÓN", ciudad: "MEDELLIN CENTRO", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 52, nombre: "TECNIAIRES J.S S.A.S", categoria: "TALLER TIPO 3", nit: "901.174.411", servicio: "AIRE ACONDICIONADO", ciudad: "CARIBE ZONA", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 53, nombre: "RADIADORES Y TANQUES ESTADIO S.A.S", categoria: "TALLER TIPO 3", nit: "901.368.208", servicio: "RADIADORES", ciudad: "MEDELLIN CENTRO", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 54, nombre: "FALKON AUTOMOTRIZ", categoria: "TALLER TIPO 3", nit: "901.501.552", servicio: "VIDRIOS", ciudad: "CARIBE ZONA", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 55, nombre: "ANDRES SANTIAGO PEREZ P", categoria: "TALLER TIPO 3", nit: "1.000.100.600", servicio: "IMAGEN CORPORATIVA", ciudad: "CARIBE ZONA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 56, nombre: "JONATHAN ANDREY PEÑA", categoria: "TALLER TIPO 3", nit: "1.024.503.859", servicio: "AIRE ACONDICIONADO", ciudad: "MUNICIPIOS DEL AMVA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 57, nombre: "VIDRIOS ARREGLOS LA MONA", categoria: "TALLER TIPO 3", nit: "1.024.522.683", servicio: "REPARACION VIDRIOS", ciudad: "CARIBE ZONA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 58, nombre: "FREDY ANDRES JIMENEZ MELO", categoria: "TALLER TIPO 3", nit: "1.026.299.101", servicio: "SISTEMA ELECTRICO", ciudad: "CARIBE ZONA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 59, nombre: "LA ESTACION TALLER DIRIMO", categoria: "TALLER TIPO 3", nit: "1.129.497.647", servicio: "MECANICA EN GENERAL", ciudad: "CARIBE ZONA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 60, nombre: "SEBASTIAN LARA ATEHORTUA", categoria: "TALLER TIPO 3", nit: "1.144.188.705", servicio: "CAJAS Y DIFERENCIALES", ciudad: "CARIBE R8A", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 61, nombre: "MARIA TERESA GARCIA TRUJILLO", categoria: "TALLER TIPO 3", nit: "1.152.693.622", servicio: "FRENOS Y SUSPENSIÓN", ciudad: "CARIBE ZONA", tipo: "NATURAL", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"},
+      {id: 62, nombre: "ALBERTO OCHOA Y CIA SAS", categoria: "TALLER TIPO 3", nit: "890.943.038", servicio: "MECANICA EN GENERAL", ciudad: "CARIBE R8A", tipo: "JURIDICA", direccion: "", telefono: "", email: "", contacto: "", calificacion: 5, activo: true, notas: "", fecha_registro: "2025-12-01"}
+    ];
+    
+    localStorage.setItem(STORAGE_KEY_PROVEEDORES, JSON.stringify(proveedoresIniciales));
+    cacheProveedores = proveedoresIniciales;
+    console.log(`✅ ${proveedoresIniciales.length} proveedores cargados exitosamente`);
+    console.log('   - TALLER TIPO 1: 4 proveedores');
+    console.log('   - TALLER TIPO 2: 16 proveedores');
+    console.log('   - TALLER TIPO 3: 42 proveedores');
+  } else {
+    console.log('✅ Proveedores ya cargados en localStorage');
+    
+    // Intentar sincronizar con Google Sheets en segundo plano
+    if (typeof googleSheets !== 'undefined' && googleSheets.isConfigured()) {
+      try {
+        const proveedoresSheets = await googleSheets.leerProveedores();
+        if (proveedoresSheets && proveedoresSheets.length > 0) {
+          localStorage.setItem(STORAGE_KEY_PROVEEDORES, JSON.stringify(proveedoresSheets));
+          cacheProveedores = proveedoresSheets;
+          console.log(`🔄 ${proveedoresSheets.length} proveedores sincronizados desde Google Sheets`);
+        }
+      } catch (error) {
+        console.log('ℹ️ Usando proveedores de localStorage (Google Sheets no disponible)');
+      }
     }
-  } catch (error) {
-    console.error('❌ Error al sincronizar proveedores:', error);
   }
 }
 
