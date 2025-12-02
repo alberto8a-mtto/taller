@@ -2,20 +2,21 @@
   "name": "Alberto Ochoa - Gestión de Taller",
   "short_name": "Taller AO",
   "description": "Sistema de gestión de taller - Alberto Ochoa & Cía. S.A.S",
-  "start_url": "/",
+  "start_url": "/TALLER/public/",
+  "scope": "/TALLER/",
   "display": "standalone",
-  "background_color": "#1a1a1a",
+  "background_color": "#ffffff",
   "theme_color": "#e31e24",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/assets/logo.png",
+      "src": "/TALLER/public/assets/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/assets/logo.png",
+      "src": "/TALLER/public/assets/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

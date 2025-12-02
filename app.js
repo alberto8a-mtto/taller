@@ -846,7 +846,11 @@ function mostrarToast(mensaje, tipo = 'info') {
 function configurarPWA() {
   // Service Worker
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js')
+    const swPath = window.location.hostname === 'mgomez0520.github.io' 
+      ? '/TALLER/public/service-worker.js'
+      : '/service-worker.js';
+    
+    navigator.serviceWorker.register(swPath)
       .then(reg => console.log('✅ Service Worker registrado'))
       .catch(err => console.log('❌ Error en Service Worker:', err));
   }
