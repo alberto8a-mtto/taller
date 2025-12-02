@@ -584,7 +584,18 @@ async function buscarPorVehiculo() {
   }
   
   const reportes = await obtenerReportes();
-  let reportesVehiculo = reportes.filter(r => r.numero_vehiculo === numeroVehiculo);
+  
+  // Búsqueda flexible: comparar como string y como número
+  let reportesVehiculo = reportes.filter(r => {
+    const vehiculoReporte = String(r.numero_vehiculo).trim();
+    const vehiculoBuscado = String(numeroVehiculo).trim();
+    return vehiculoReporte === vehiculoBuscado || 
+           vehiculoReporte.toLowerCase() === vehiculoBuscado.toLowerCase();
+  });
+  
+  console.log('🔍 Búsqueda de vehículo:', numeroVehiculo);
+  console.log('📊 Total reportes en sistema:', reportes.length);
+  console.log('✅ Reportes encontrados:', reportesVehiculo.length);
   
   // Filtrar por rango de fechas si se proporcionaron
   if (fechaDesde) {
@@ -595,6 +606,7 @@ async function buscarPorVehiculo() {
       fechaReporte.setHours(0, 0, 0, 0);
       return fechaReporte >= desde;
     });
+    console.log('📅 Después de filtrar fecha desde:', reportesVehiculo.length);
   }
   
   if (fechaHasta) {
@@ -604,6 +616,7 @@ async function buscarPorVehiculo() {
       const fechaReporte = new Date(r.fecha_reporte);
       return fechaReporte <= hasta;
     });
+    console.log('📅 Después de filtrar fecha hasta:', reportesVehiculo.length);
   }
   
   // Ordenar por fecha de reporte (más reciente primero)
@@ -615,9 +628,16 @@ async function buscarPorVehiculo() {
     const mensajeFecha = (fechaDesde || fechaHasta) 
       ? ` en el rango de fechas seleccionado`
       : '';
+    
+    // Mostrar sugerencias si hay reportes en el sistema
+    const sugerencias = reportes.length > 0 
+      ? `<p style="margin-top: 1rem; color: #666;">💡 Vehículos registrados: ${[...new Set(reportes.map(r => r.numero_vehiculo))].join(', ')}</p>`
+      : '';
+    
     container.innerHTML = `
       <div class="search-no-results">
         <p>❌ No se encontraron reportes para el vehículo <strong>${numeroVehiculo}</strong>${mensajeFecha}</p>
+        ${sugerencias}
       </div>
     `;
     return;
