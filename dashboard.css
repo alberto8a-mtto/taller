@@ -46,6 +46,18 @@ body {
   align-items: center;
 }
 
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.company-logo-dashboard {
+  height: 80px;
+  width: auto;
+  object-fit: contain;
+}
+
 .header-logo h1 {
   font-size: 2rem;
   font-weight: 900;

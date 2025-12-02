@@ -92,19 +92,14 @@ body {
   gap: 1rem;
 }
 
-.header-logo::before {
-  content: "AO";
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 50px;
+.company-logo {
   height: 50px;
-  background: var(--brand-red);
-  color: white;
-  font-weight: 900;
-  font-size: 1.3rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(227, 30, 36, 0.4);
+  width: auto;
+  object-fit: contain;
+}
+
+.header-logo::before {
+  display: none;
 }
 
 .header-logo img {
