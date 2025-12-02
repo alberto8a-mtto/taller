@@ -67,8 +67,8 @@ body {
    HEADER
    ======================================== */
 .app-header {
-  background: linear-gradient(135deg, var(--brand-black), #2a2a2a);
-  color: var(--text-white);
+  background: white;
+  color: var(--brand-black);
   padding: 1rem 1.5rem;
   box-shadow: var(--shadow-lg);
   position: sticky;
@@ -110,7 +110,7 @@ body {
 .app-header h1 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--text-white);
+  color: var(--brand-black);
 }
 
 .app-header h1 .brand-highlight {
