@@ -30,7 +30,7 @@ body {
    HEADER
    ======================================== */
 .dashboard-header {
-  background: linear-gradient(135deg, var(--brand-black), #2a2a2a);
+  background: white;
   padding: 1.5rem 2rem;
   border-bottom: 4px solid var(--brand-red);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -62,7 +62,7 @@ body {
   font-size: 2rem;
   font-weight: 900;
   letter-spacing: 2px;
-  color: var(--text-white);
+  color: var(--brand-black);
 }
 
 .brand-red {
@@ -71,7 +71,7 @@ body {
 
 .subtitle {
   font-size: 0.9rem;
-  color: #ccc;
+  color: #666;
   margin-top: 0.25rem;
   text-transform: uppercase;
   letter-spacing: 1px;
