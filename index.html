@@ -64,10 +64,18 @@
 
         <div class="card">
           <h2>Buscar Reportes de un Vehículo</h2>
-          <div class="form-group">
-            <input type="text" id="buscarVehiculo" placeholder="Número de vehículo">
-            <button onclick="buscarPorVehiculo()" class="btn btn-secondary">Buscar</button>
+          
+          <div class="search-row">
+            <input type="text" id="buscarVehiculo" placeholder="N° Vehículo">
+            <input type="date" id="fechaDesde" title="Fecha desde">
+            <input type="date" id="fechaHasta" title="Fecha hasta">
           </div>
+          
+          <div class="search-buttons">
+            <button onclick="buscarPorVehiculo()" class="btn btn-primary">🔍 Buscar</button>
+            <button onclick="limpiarBusqueda()" class="btn btn-secondary">✖ Limpiar</button>
+          </div>
+          
           <div id="resultadosBusqueda"></div>
         </div>
       </div>

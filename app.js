@@ -575,6 +575,8 @@ async function actualizarReporte() {
 // ========== BÚSQUEDA ==========
 async function buscarPorVehiculo() {
   const numeroVehiculo = document.getElementById('buscarVehiculo').value.trim();
+  const fechaDesde = document.getElementById('fechaDesde').value;
+  const fechaHasta = document.getElementById('fechaHasta').value;
   
   if (!numeroVehiculo) {
     mostrarToast('Ingresa un número de vehículo', 'error');
@@ -582,7 +584,27 @@ async function buscarPorVehiculo() {
   }
   
   const reportes = await obtenerReportes();
-  const reportesVehiculo = reportes.filter(r => r.numero_vehiculo === numeroVehiculo);
+  let reportesVehiculo = reportes.filter(r => r.numero_vehiculo === numeroVehiculo);
+  
+  // Filtrar por rango de fechas si se proporcionaron
+  if (fechaDesde) {
+    const desde = new Date(fechaDesde);
+    desde.setHours(0, 0, 0, 0);
+    reportesVehiculo = reportesVehiculo.filter(r => {
+      const fechaReporte = new Date(r.fecha_reporte);
+      fechaReporte.setHours(0, 0, 0, 0);
+      return fechaReporte >= desde;
+    });
+  }
+  
+  if (fechaHasta) {
+    const hasta = new Date(fechaHasta);
+    hasta.setHours(23, 59, 59, 999);
+    reportesVehiculo = reportesVehiculo.filter(r => {
+      const fechaReporte = new Date(r.fecha_reporte);
+      return fechaReporte <= hasta;
+    });
+  }
   
   // Ordenar por fecha de reporte (más reciente primero)
   reportesVehiculo.sort((a, b) => new Date(b.fecha_reporte) - new Date(a.fecha_reporte));
@@ -590,31 +612,54 @@ async function buscarPorVehiculo() {
   const container = document.getElementById('resultadosBusqueda');
   
   if (reportesVehiculo.length === 0) {
-    container.innerHTML = '<p style="margin-top: 1rem; color: var(--text-secondary);">No se encontraron reportes para este vehículo</p>';
+    const mensajeFecha = (fechaDesde || fechaHasta) 
+      ? ` en el rango de fechas seleccionado`
+      : '';
+    container.innerHTML = `
+      <div class="search-no-results">
+        <p>❌ No se encontraron reportes para el vehículo <strong>${numeroVehiculo}</strong>${mensajeFecha}</p>
+      </div>
+    `;
     return;
   }
   
+  const rangoFechas = (fechaDesde || fechaHasta) 
+    ? `<p class="search-info">📅 Mostrando ${reportesVehiculo.length} reporte(s) ${fechaDesde ? `desde ${formatearFecha(fechaDesde)}` : ''} ${fechaHasta ? `hasta ${formatearFecha(fechaHasta)}` : ''}</p>`
+    : `<p class="search-info">📊 Total: ${reportesVehiculo.length} reporte(s) encontrado(s)</p>`;
+  
   container.innerHTML = `
-    <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Historial del Vehículo ${numeroVehiculo}</h3>
-    <div class="reportes-grid">
-      ${reportesVehiculo.map(reporte => `
-        <div class="reporte-card" onclick="verDetalle(${reporte.id})">
-          <div class="reporte-header">
-            <div class="reporte-vehiculo">Reporte #${reporte.id}</div>
-            <div class="reporte-estado estado-${reporte.estado.replace(/ /g, '-').replace(/Á/g, 'A').replace(/É/g, 'E').replace(/Í/g, 'I').replace(/Ó/g, 'O').replace(/Ú/g, 'U')}">
-              ${reporte.estado}
+    <div class="search-results">
+      <h3>Historial del Vehículo ${numeroVehiculo}</h3>
+      ${rangoFechas}
+      <div class="reportes-grid">
+        ${reportesVehiculo.map(reporte => `
+          <div class="reporte-card" onclick="verDetalle(${reporte.id})">
+            <div class="reporte-header">
+              <div class="reporte-vehiculo">Reporte #${reporte.id}</div>
+              <div class="reporte-estado estado-${reporte.estado.replace(/ /g, '-').replace(/Á/g, 'A').replace(/É/g, 'E').replace(/Í/g, 'I').replace(/Ó/g, 'O').replace(/Ú/g, 'U')}">
+                ${reporte.estado}
+              </div>
+            </div>
+            <div class="reporte-descripcion">
+              ${reporte.descripcion || 'Sin descripción'}
+            </div>
+            <div class="reporte-footer">
+              <span>📅 ${formatearFecha(reporte.fecha_reporte)}</span>
+              ${reporte.tecnico_asignado ? `<span>👤 ${reporte.tecnico_asignado}</span>` : ''}
             </div>
           </div>
-          <div class="reporte-descripcion">
-            ${reporte.descripcion || 'Sin descripción'}
-          </div>
-          <div class="reporte-footer">
-            <span>📅 ${formatearFecha(reporte.fecha_reporte)}</span>
-          </div>
-        </div>
-      `).join('')}
+        `).join('')}
+      </div>
     </div>
   `;
+}
+
+function limpiarBusqueda() {
+  document.getElementById('buscarVehiculo').value = '';
+  document.getElementById('fechaDesde').value = '';
+  document.getElementById('fechaHasta').value = '';
+  document.getElementById('resultadosBusqueda').innerHTML = '';
+  mostrarToast('Búsqueda limpiada', 'success');
 }
 
 // ========== ESTADÍSTICAS ==========
