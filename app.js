@@ -863,13 +863,11 @@ function mostrarModalFinalizarOrden() {
       <div style="background-color: white; margin: 5% auto; padding: 2rem; width: 90%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
         <div style="display: flex; flex-direction: column; gap: 1rem;">
           <button type="button" class="btn" style="background: #f59e0b; padding: 1rem; font-size: 1rem;" onclick="finalizarOrden('SEGUIMIENTO')">
-            📋 SEGUIMIENTO<br>
-            <small style="font-size: 0.85rem; opacity: 0.9;">Se guarda pero no aparece en la lista. Puedes editarlo después.</small>
+            SEGUIMIENTO
           </button>
           
           <button type="button" class="btn" style="background: #10b981; padding: 1rem; font-size: 1rem;" onclick="finalizarOrden('DISPONIBLE')">
-            ✅ DISPONIBLE<br>
-            <small style="font-size: 0.85rem; opacity: 0.9;">Vehículo disponible. Se archiva y oculta de la lista.</small>
+            DISPONIBLE
           </button>
         </div>
         
