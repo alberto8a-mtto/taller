@@ -530,6 +530,12 @@ async function generarFormularioActualizacion(reporte) {
       <button type="submit" class="btn btn-primary">Actualizar</button>
     </form>
     
+    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #10b981;">
+      <button type="button" class="btn" style="background: #10b981; width: 100%;" onclick="mostrarModalFinalizarOrden()">
+        Finalizar Orden de Trabajo
+      </button>
+    </div>
+    
     <script>
       // Preseleccionar el taller actual si existe
       const tallerSelect = document.getElementById('tallerAsignado');
