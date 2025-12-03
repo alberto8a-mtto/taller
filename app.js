@@ -420,8 +420,6 @@ async function mostrarModalDetalle(reporte) {
     </div>
     
     <div class="detalle-section" style="border-top: 2px solid #dc3545; margin-top: 2rem; padding-top: 1rem;">
-      <h3 style="color: #dc3545;">Zona Peligrosa</h3>
-      <p style="color: var(--text-secondary); margin-bottom: 1rem;">Esta acción no se puede deshacer.</p>
       <button type="button" class="btn" style="background: #dc3545; width: 100%;" onclick="confirmarEliminarReporte(${reporte.id})">
         Eliminar Reporte
       </button>
@@ -531,16 +529,6 @@ async function generarFormularioActualizacion(reporte) {
       
       <button type="submit" class="btn btn-primary">Actualizar</button>
     </form>
-    
-    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #10b981;">
-      <h4 style="color: #10b981; margin-bottom: 1rem;">🏁 Finalizar Orden</h4>
-      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
-        Finaliza esta orden de trabajo y archívala.
-      </p>
-      <button type="button" class="btn" style="background: #10b981; width: 100%;" onclick="mostrarModalFinalizarOrden()">
-        Finalizar Orden de Trabajo
-      </button>
-    </div>
     
     <script>
       // Preseleccionar el taller actual si existe
@@ -867,11 +855,6 @@ function mostrarModalFinalizarOrden() {
   const modalHtml = `
     <div id="modalFinalizarOrden" style="display: block; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
       <div style="background-color: white; margin: 5% auto; padding: 2rem; width: 90%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
-        <h3 style="color: #10b981; margin-bottom: 1.5rem;">🏁 Finalizar Orden de Trabajo</h3>
-        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
-          Selecciona cómo deseas finalizar esta orden:
-        </p>
-        
         <div style="display: flex; flex-direction: column; gap: 1rem;">
           <button type="button" class="btn" style="background: #f59e0b; padding: 1rem; font-size: 1rem;" onclick="finalizarOrden('SEGUIMIENTO')">
             📋 SEGUIMIENTO<br>
