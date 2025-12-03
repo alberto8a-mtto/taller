@@ -512,17 +512,19 @@ async function generarFormularioActualizacion(reporte) {
 }
 
 function obtenerSiguientesEstados(estadoActual) {
-  const flujo = {
-    'REPORTE': ['TÉCNICO ASIGNADO'],
-    'TÉCNICO ASIGNADO': ['ANÁLISIS'],
-    'ANÁLISIS': ['TALLER'],
-    'TALLER': ['DIAGNÓSTICO'],
-    'DIAGNÓSTICO': ['REPARACIÓN', 'SEGUIMIENTO'],
-    'REPARACIÓN': ['SEGUIMIENTO'],
-    'SEGUIMIENTO': []
-  };
+  // Todos los estados disponibles para libre edición
+  const todosLosEstados = [
+    'REPORTE',
+    'TÉCNICO ASIGNADO',
+    'ANÁLISIS',
+    'TALLER',
+    'DIAGNÓSTICO',
+    'REPARACIÓN',
+    'SEGUIMIENTO'
+  ];
   
-  return flujo[estadoActual] || [];
+  // Filtrar el estado actual para no mostrarlo como opción
+  return todosLosEstados.filter(estado => estado !== estadoActual);
 }
 
 async function actualizarReporte() {
