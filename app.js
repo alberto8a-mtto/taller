@@ -173,6 +173,8 @@ function cambiarVista(vista) {
     cargarEstadisticas();
   } else if (vista === 'proveedores') {
     cargarProveedores();
+  } else if (vista === 'seguimiento') {
+    cargarReportesSeguimiento();
   }
 }
 
@@ -207,6 +209,7 @@ async function crearReporte() {
     diagnostico: null,
     requiere_reparacion: null,
     notas: null,
+    oculto: false,
     fecha_reporte: new Date().toISOString(),
     fecha_actualizacion: new Date().toISOString()
   };
@@ -225,6 +228,9 @@ async function crearReporte() {
 async function cargarReportes() {
   const filtro = document.getElementById('filtroEstado').value;
   let reportes = await obtenerReportes();
+  
+  // Filtrar reportes ocultos
+  reportes = reportes.filter(r => !r.oculto);
   
   if (filtro) {
     reportes = reportes.filter(r => r.estado === filtro);
@@ -273,6 +279,41 @@ function mostrarReportes(reportes) {
       </div>
       <div class="reporte-action">
         <button class="btn-ver-detalle">Ver Detalles</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function cargarReportesSeguimiento() {
+  let reportes = await obtenerReportes();
+  
+  // Filtrar solo reportes en SEGUIMIENTO (ocultos pero editables)
+  reportes = reportes.filter(r => r.estado === 'SEGUIMIENTO');
+  
+  // Ordenar por fecha de actualización (más reciente primero)
+  reportes.sort((a, b) => new Date(b.fecha_actualizacion) - new Date(a.fecha_actualizacion));
+  
+  const container = document.getElementById('listaSeguimiento');
+  
+  if (reportes.length === 0) {
+    container.innerHTML = '<div class="card"><p>No hay reportes en seguimiento</p></div>';
+    return;
+  }
+  
+  container.innerHTML = reportes.map(reporte => `
+    <div class="reporte-card" ondblclick="verDetalle(${reporte.id})">
+      <div class="reporte-header">
+        <div class="reporte-vehiculo">🚗 ${reporte.numero_vehiculo}</div>
+        <div class="reporte-estado estado-${reporte.estado.replace(/ /g, '-').replace(/Á/g, 'A').replace(/É/g, 'E').replace(/Í/g, 'I').replace(/Ó/g, 'O').replace(/Ú/g, 'U')}">
+          ${reporte.estado}
+        </div>
+      </div>
+      <div class="reporte-descripcion">
+        ${reporte.descripcion || 'Sin descripción'}
+      </div>
+      <div class="reporte-footer">
+        <span>📅 ${formatearFecha(reporte.fecha_reporte)}</span>
+        ${reporte.tecnico_asignado ? `<span>👤 ${reporte.tecnico_asignado}</span>` : ''}
       </div>
     </div>
   `).join('');
@@ -491,6 +532,16 @@ async function generarFormularioActualizacion(reporte) {
       <button type="submit" class="btn btn-primary">Actualizar</button>
     </form>
     
+    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #10b981;">
+      <h4 style="color: #10b981; margin-bottom: 1rem;">🏁 Finalizar Orden</h4>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
+        Finaliza esta orden de trabajo y archívala.
+      </p>
+      <button type="button" class="btn" style="background: #10b981; width: 100%;" onclick="mostrarModalFinalizarOrden()">
+        Finalizar Orden de Trabajo
+      </button>
+    </div>
+    
     <script>
       // Preseleccionar el taller actual si existe
       const tallerSelect = document.getElementById('tallerAsignado');
@@ -512,17 +563,20 @@ async function generarFormularioActualizacion(reporte) {
 }
 
 function obtenerSiguientesEstados(estadoActual) {
-  // Todos los estados disponibles para libre edición
+  // Todos los estados disponibles para libre edición (excepto SEGUIMIENTO y DISPONIBLE que son finales)
   const todosLosEstados = [
     'REPORTE',
     'TÉCNICO ASIGNADO',
     'ANÁLISIS',
     'TALLER',
     'DIAGNÓSTICO',
-    'REPARACIÓN',
-    'SEGUIMIENTO',
-    'FINALIZADO'
+    'REPARACIÓN'
   ];
+  
+  // Si está en SEGUIMIENTO, permitir cambiar a cualquier estado (para editar)
+  if (estadoActual === 'SEGUIMIENTO') {
+    return todosLosEstados;
+  }
   
   // Filtrar el estado actual para no mostrarlo como opción
   return todosLosEstados.filter(estado => estado !== estadoActual);
@@ -559,6 +613,11 @@ async function actualizarReporte() {
   // Actualizar el reporte
   reportes[index].estado = nuevoEstado;
   reportes[index].fecha_actualizacion = new Date().toISOString();
+  
+  // Si estaba en SEGUIMIENTO y se cambia a otro estado, hacerlo visible de nuevo
+  if (reporteActual.estado === 'SEGUIMIENTO' && nuevoEstado !== 'SEGUIMIENTO') {
+    reportes[index].oculto = false;
+  }
   
   if (tecnico) reportes[index].tecnico_asignado = tecnico;
   if (taller) reportes[index].taller_asignado = taller;
@@ -802,6 +861,76 @@ async function eliminarReporte(reporteId) {
 // ========== MODAL ==========
 function cerrarModal() {
   document.getElementById('modalDetalle').style.display = 'none';
+}
+
+function mostrarModalFinalizarOrden() {
+  const modalHtml = `
+    <div id="modalFinalizarOrden" style="display: block; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+      <div style="background-color: white; margin: 5% auto; padding: 2rem; width: 90%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+        <h3 style="color: #10b981; margin-bottom: 1.5rem;">🏁 Finalizar Orden de Trabajo</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+          Selecciona cómo deseas finalizar esta orden:
+        </p>
+        
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <button type="button" class="btn" style="background: #f59e0b; padding: 1rem; font-size: 1rem;" onclick="finalizarOrden('SEGUIMIENTO')">
+            📋 SEGUIMIENTO<br>
+            <small style="font-size: 0.85rem; opacity: 0.9;">Se guarda pero no aparece en la lista. Puedes editarlo después.</small>
+          </button>
+          
+          <button type="button" class="btn" style="background: #10b981; padding: 1rem; font-size: 1rem;" onclick="finalizarOrden('DISPONIBLE')">
+            ✅ DISPONIBLE<br>
+            <small style="font-size: 0.85rem; opacity: 0.9;">Vehículo disponible. Se archiva y oculta de la lista.</small>
+          </button>
+        </div>
+        
+        <button type="button" class="btn" style="background: #64748b; width: 100%; margin-top: 1.5rem;" onclick="cerrarModalFinalizarOrden()">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function cerrarModalFinalizarOrden() {
+  const modal = document.getElementById('modalFinalizarOrden');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+async function finalizarOrden(tipoFinalizacion) {
+  if (!reporteActual) {
+    mostrarToast('Error: No hay reporte activo', 'error');
+    return;
+  }
+  
+  const reportes = await obtenerReportes();
+  const index = reportes.findIndex(r => r.id === reporteActual.id);
+  
+  if (index === -1) {
+    mostrarToast('Reporte no encontrado', 'error');
+    return;
+  }
+  
+  // Actualizar el reporte
+  reportes[index].estado = tipoFinalizacion;
+  reportes[index].oculto = true; // Ambos se ocultan de la lista
+  reportes[index].fecha_actualizacion = new Date().toISOString();
+  
+  await guardarReportes(reportes);
+  
+  const mensaje = tipoFinalizacion === 'SEGUIMIENTO' 
+    ? '📋 Orden enviada a SEGUIMIENTO (oculta, editable)'
+    : '✅ Vehículo marcado como DISPONIBLE (archivado)';
+  
+  mostrarToast(mensaje, 'success');
+  cerrarModalFinalizarOrden();
+  cerrarModal();
+  cargarReportes();
+  cargarEstadisticas();
 }
 
 window.onclick = function(event) {

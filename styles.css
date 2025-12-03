@@ -563,8 +563,14 @@ body {
   color: #a16207; 
 }
 .estado-SEGUIMIENTO { 
-  background: #dcfce7; 
-  color: #166534; 
+  background: #fef3c7; 
+  color: #92400e; 
+  font-weight: 600;
+}
+.estado-DISPONIBLE { 
+  background: #d1fae5; 
+  color: #065f46; 
+  font-weight: 600;
 }
 .estado-FINALIZADO { 
   background: #1e293b; 

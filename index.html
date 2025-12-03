@@ -33,6 +33,7 @@
     <nav class="nav-tabs">
       <button class="tab-btn active" data-view="nuevo">Nuevo Reporte</button>
       <button class="tab-btn" data-view="lista">Lista</button>
+      <button class="tab-btn" data-view="seguimiento">Seguimiento</button>
       <button class="tab-btn" data-view="proveedores">Proveedores</button>
       <button class="tab-btn" data-view="estadisticas">Estadísticas</button>
       <button class="tab-btn" data-view="config" style="margin-left: auto; background: #28a745; display: none;">Google Sheets</button>
@@ -101,6 +102,19 @@
         </div>
         
         <div id="listaReportes" class="reportes-grid"></div>
+      </div>
+    </div>
+
+    <!-- Vista: Seguimiento -->
+    <div id="view-seguimiento" class="view">
+      <div class="container">
+        <div class="card">
+          <h2>📋 Reportes en Seguimiento</h2>
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+            Estos reportes están archivados pero puedes editarlos. No aparecen en la lista principal.
+          </p>
+        </div>
+        <div id="listaSeguimiento" class="reportes-grid"></div>
       </div>
     </div>
 
