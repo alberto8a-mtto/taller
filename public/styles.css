@@ -566,6 +566,11 @@ body {
   background: #dcfce7; 
   color: #166534; 
 }
+.estado-FINALIZADO { 
+  background: #1e293b; 
+  color: #ffffff; 
+  font-weight: 600;
+}
 
 .reporte-descripcion {
   color: var(--text-secondary);

@@ -520,7 +520,8 @@ function obtenerSiguientesEstados(estadoActual) {
     'TALLER',
     'DIAGNÓSTICO',
     'REPARACIÓN',
-    'SEGUIMIENTO'
+    'SEGUIMIENTO',
+    'FINALIZADO'
   ];
   
   // Filtrar el estado actual para no mostrarlo como opción
