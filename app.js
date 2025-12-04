@@ -419,6 +419,12 @@ async function mostrarModalDetalle(reporte) {
       ${formularioActualizacion}
     </div>
     
+    <div class="detalle-section" style="border-top: 2px solid #10b981; margin-top: 2rem; padding-top: 1rem;">
+      <button type="button" class="btn" style="background: #10b981; width: 100%;" onclick="mostrarModalFinalizarOrden()">
+        Finalizar Orden de Trabajo
+      </button>
+    </div>
+    
     <div class="detalle-section" style="border-top: 2px solid #dc3545; margin-top: 2rem; padding-top: 1rem;">
       <button type="button" class="btn" style="background: #dc3545; width: 100%;" onclick="confirmarEliminarReporte(${reporte.id})">
         Eliminar Reporte
