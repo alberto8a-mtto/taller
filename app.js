@@ -229,8 +229,8 @@ async function cargarReportes() {
   const filtro = document.getElementById('filtroEstado').value;
   let reportes = await obtenerReportes();
   
-  // Filtrar reportes ocultos
-  reportes = reportes.filter(r => !r.oculto);
+  // Filtrar reportes ocultos (por campo oculto o por estado DISPONIBLE/SEGUIMIENTO)
+  reportes = reportes.filter(r => !r.oculto && r.estado !== 'DISPONIBLE' && r.estado !== 'SEGUIMIENTO');
   
   if (filtro) {
     reportes = reportes.filter(r => r.estado === filtro);
@@ -642,7 +642,7 @@ async function buscarPorVehiculo() {
   let reportes = await obtenerReportes();
   
   // Filtrar reportes ocultos de la búsqueda
-  reportes = reportes.filter(r => !r.oculto);
+  reportes = reportes.filter(r => !r.oculto && r.estado !== 'DISPONIBLE' && r.estado !== 'SEGUIMIENTO');
   
   // Búsqueda flexible: comparar como string y como número
   let reportesVehiculo = reportes.filter(r => {
@@ -746,7 +746,7 @@ async function cargarEstadisticas() {
   let reportes = await obtenerReportes();
   
   // Filtrar reportes ocultos de las estadísticas
-  reportes = reportes.filter(r => !r.oculto);
+  reportes = reportes.filter(r => !r.oculto && r.estado !== 'DISPONIBLE' && r.estado !== 'SEGUIMIENTO');
   
   if (reportes.length === 0) {
     const container = document.getElementById('estadisticasContent');

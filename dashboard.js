@@ -64,7 +64,7 @@ async function cargarDatosDashboard() {
     }
     
     // Filtrar vehículos ocultos (SEGUIMIENTO y DISPONIBLE) y mostrar solo los activos
-    const vehiculosEnProceso = reportes.filter(r => !r.oculto);
+    const vehiculosEnProceso = reportes.filter(r => !r.oculto && r.estado !== 'DISPONIBLE' && r.estado !== 'SEGUIMIENTO');
     
     // Mezclar aleatoriamente los vehículos
     todosLosVehiculos = mezclarArray(vehiculosEnProceso);
