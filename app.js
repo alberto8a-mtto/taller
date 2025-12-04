@@ -639,7 +639,10 @@ async function buscarPorVehiculo() {
     return;
   }
   
-  const reportes = await obtenerReportes();
+  let reportes = await obtenerReportes();
+  
+  // Filtrar reportes ocultos de la búsqueda
+  reportes = reportes.filter(r => !r.oculto);
   
   // Búsqueda flexible: comparar como string y como número
   let reportesVehiculo = reportes.filter(r => {
@@ -740,7 +743,10 @@ function limpiarBusqueda() {
 
 // ========== ESTADÍSTICAS ==========
 async function cargarEstadisticas() {
-  const reportes = await obtenerReportes();
+  let reportes = await obtenerReportes();
+  
+  // Filtrar reportes ocultos de las estadísticas
+  reportes = reportes.filter(r => !r.oculto);
   
   if (reportes.length === 0) {
     const container = document.getElementById('estadisticasContent');

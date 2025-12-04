@@ -63,8 +63,8 @@ async function cargarDatosDashboard() {
       reportes = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     }
     
-    // Filtrar vehículos en proceso (no en SEGUIMIENTO)
-    const vehiculosEnProceso = reportes.filter(r => r.estado !== 'SEGUIMIENTO');
+    // Filtrar vehículos ocultos (SEGUIMIENTO y DISPONIBLE) y mostrar solo los activos
+    const vehiculosEnProceso = reportes.filter(r => !r.oculto);
     
     // Mezclar aleatoriamente los vehículos
     todosLosVehiculos = mezclarArray(vehiculosEnProceso);
