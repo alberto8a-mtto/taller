@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Deploy to GitHub Pages",
+			"type": "shell",
+			"command": "git checkout main; git pull; git subtree push --prefix public origin gh-pages",
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}
