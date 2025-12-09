@@ -130,6 +130,19 @@ document.addEventListener('DOMContentLoaded', () => {
   cargarProveedoresPrueba(); // Cargar proveedores de prueba
   cargarReportes();
   cargarEstadisticas();
+
+  // Registro correcto del service worker para GitHub Pages
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(function(registration) {
+          console.log('ServiceWorker registrado con éxito:', registration.scope);
+        })
+        .catch(function(error) {
+          console.error('Error al registrar el ServiceWorker:', error);
+        });
+    });
+  }
 });
 
 function inicializarApp() {
