@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reporte Rodamiento | Gestión de Taller</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container" style="max-width: 600px; margin-top: 2rem;">
+    <div class="card">
+      <h2>Nuevo Reporte - Área Rodamiento</h2>
+      <form id="formRodamiento">
+        <div class="form-group">
+          <label for="numero_vehiculo">Número de Vehículo *</label>
+          <input type="text" id="numero_vehiculo" required placeholder="Ej: 001, 002, VH-123">
+        </div>
+        <div class="form-group">
+          <label for="descripcion">Descripción *</label>
+          <textarea id="descripcion" required rows="4" placeholder="Describe la novedad..."></textarea>
+        </div>
+        <input type="hidden" id="area" value="RODAMIENTO">
+        <button type="submit" class="btn btn-primary">Registrar Reporte</button>
+      </form>
+      <div id="mensajeRodamiento" style="margin-top:1.5rem;"></div>
+    </div>
+  </div>
+  <script src="google-apps-script.js"></script>
+  <script>
+    document.getElementById('formRodamiento').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const numero_vehiculo = document.getElementById('numero_vehiculo').value.trim();
+      const descripcion = document.getElementById('descripcion').value.trim();
+      const area = document.getElementById('area').value;
+      if (!numero_vehiculo || !descripcion) {
+        document.getElementById('mensajeRodamiento').innerHTML = '<span style="color:red">Todos los campos son obligatorios.</span>';
+        return;
+      }
+      // Crear reporte con área Rodamiento
+      let reportes = await googleSheets.leerReportes();
+      const nextId = reportes.length > 0 ? Math.max(...reportes.map(r => r.id)) + 1 : 1;
+      const nuevoReporte = {
+        id: nextId,
+        numero_vehiculo,
+        estado: 'REPORTE',
+        descripcion,
+        area,
+        fecha_reporte: new Date().toISOString(),
+        fecha_actualizacion: new Date().toISOString()
+      };
+      reportes.push(nuevoReporte);
+      await googleSheets.guardarReportes(reportes);
+      document.getElementById('mensajeRodamiento').innerHTML = '<span style="color:green">Reporte registrado correctamente.</span>';
+      document.getElementById('formRodamiento').reset();
+    });
+  </script>
+</body>
+</html>
