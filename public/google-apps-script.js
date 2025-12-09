@@ -36,26 +36,25 @@ class GoogleAppsScriptDB {
 
     try {
       const url = `${this.scriptUrl}?action=leer`;
+      console.log('[DEBUG] Solicitando reportes a:', url);
       const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
+      console.log('[DEBUG] Respuesta HTTP:', response.status, response.statusText);
+      const text = await response.text();
+      console.log('[DEBUG] Respuesta RAW:', text);
+      let result;
+      try {
+        result = JSON.parse(text);
+      } catch (parseError) {
+        console.error('[DEBUG] Error al parsear JSON:', parseError);
+        throw new Error('Respuesta no es JSON válido');
       }
-
-      const result = await response.json();
-      
       if (!result.success) {
         throw new Error(result.error || 'Error desconocido');
       }
-
       const reportes = result.data;
-      
-      // Guardar en localStorage como respaldo
       localStorage.setItem('gestion_taller_reportes', JSON.stringify(reportes));
-      
       console.log('✅ Reportes leídos desde Google Sheets:', reportes.length);
       return reportes;
-
     } catch (error) {
       console.error('❌ Error al leer Google Sheets:', error);
       console.warn('⚠️ Usando datos del localStorage como respaldo');
