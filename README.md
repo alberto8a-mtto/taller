@@ -4,7 +4,7 @@ Sistema web para la gestión integral del taller automotriz.
 
 ## 🚀 Acceso al Sistema
 
-**Página en vivo**: [https://mgomez0520.github.io/TALLER/](https://mgomez0520.github.io/TALLER/)
+**Página en vivo**: [https://alberto8a-mtto.github.io/taller/)](https://alberto8a-mtto.github.io/taller/)
 
 ## 📱 Características
 
@@ -32,10 +32,10 @@ Sistema web para la gestión integral del taller automotriz.
 
 ## 🔗 Enlaces Rápidos
 
-- [Sistema Principal](https://mgomez0520.github.io/TALLER/public/index.html)
-- [Dashboard TV](https://mgomez0520.github.io/TALLER/public/dashboard.html)
-- [Versión Móvil](https://mgomez0520.github.io/TALLER/public/movil.html)
-- [Sincronizar Proveedores](https://mgomez0520.github.io/TALLER/public/sincronizar-proveedores.html)
+- [Sistema Principal](https://alberto8a-mtto.github.io/taller/)
+- [Dashboard TV](https://alberto8a-mtto.github.io/taller/dashboard.html)
+- [Versión Móvil](https://alberto8a-mtto.github.io/taller/movil.html)
+- [Sincronizar Proveedores](https://alberto8a-mtto.github.io/taller/sincronizar-proveedores.html)
 
 ## 📝 Licencia
 
