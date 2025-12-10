@@ -5,7 +5,7 @@
 class GoogleAppsScriptDB {
   constructor() {
     // URL predeterminada del Apps Script
-    const defaultUrl = 'https://script.google.com/macros/s/AKfycybh-LwdwcqhcMD0ZVefdjmD2povXVeFSUR-Z5J3L6c7XBWWbAEG2LNZ1pnF5Kag6Tk/exec';
+    const defaultUrl = 'https://script.google.com/macros/s/AKfycby5cOokk3Jigm4OAwmccxPdA4IvZe38HtlP3D4JAlhNcUwpCJ-Hm35ud4Jgj4XVMeQY/exec';
     this.scriptUrl = localStorage.getItem('google_script_url') || defaultUrl;
     this.syncEnabled = true;
     
