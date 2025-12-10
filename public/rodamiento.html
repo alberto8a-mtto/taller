@@ -39,10 +39,10 @@
       const descripcion = document.getElementById('descripcion').value.trim();
       const area = document.getElementById('area').value;
       if (!numero_vehiculo || !nombre_conductor || !descripcion) {
-        document.getElementById('mensajeRodamiento').innerHTML = '<span style="color:red">Todos los campos son obligatorios.</span>';
+        document.getElementById('mensajeRodamiento').innerHTML = '<span style="color:red">Todos los campos obligatorios deben estar completos.</span>';
         return;
       }
-      // Crear reporte con área Rodamiento
+      // Crear reporte con área Rodamiento (solo datos básicos)
       let reportes = await googleSheets.leerReportes();
       const nextId = reportes.length > 0 ? Math.max(...reportes.map(r => r.id)) + 1 : 1;
       const nuevoReporte = {
