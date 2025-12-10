@@ -660,8 +660,8 @@ async function buscarPorVehiculo() {
   
   let reportes = await obtenerReportes();
   
-  // Filtrar reportes ocultos de la búsqueda
-  reportes = reportes.filter(r => !r.oculto && r.estado !== 'DISPONIBLE' && r.estado !== 'SEGUIMIENTO');
+  // Mostrar todos los reportes, incluidos ocultos y archivados
+  // (No filtrar por oculto ni por estado)
   
   // Búsqueda flexible: comparar como string y como número
   let reportesVehiculo = reportes.filter(r => {
