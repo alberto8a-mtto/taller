@@ -36,6 +36,7 @@ Sistema web para la gestión integral del taller automotriz.
 - [Dashboard TV](https://alberto8a-mtto.github.io/taller/dashboard.html)
 - [Versión Móvil](https://alberto8a-mtto.github.io/taller/movil.html)
 - [Sincronizar Proveedores](https://alberto8a-mtto.github.io/taller/sincronizar-proveedores.html)
+- [Rodamiento](https://alberto8a-mtto.github.io/taller/rodamiento.html)
 
 ## 📝 Licencia
 
