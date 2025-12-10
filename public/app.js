@@ -242,8 +242,8 @@ async function cargarReportes() {
   const filtro = document.getElementById('filtroEstado').value;
   let reportes = await obtenerReportes();
   
-  // Filtrar solo reportes ocultos
-  reportes = reportes.filter(r => !r.oculto);
+  // Ocultar reportes archivados y los de estado DISPONIBLE
+  reportes = reportes.filter(r => !r.oculto && r.estado !== 'DISPONIBLE');
   
   if (filtro) {
     reportes = reportes.filter(r => r.estado === filtro);
