@@ -5,7 +5,7 @@
 class GoogleAppsScriptDB {
   constructor() {
     // URL predeterminada del Apps Script
-    const defaultUrl = 'https://script.google.com/macros/s/AKfycbw_bTB-ojVfkr989v2ji9EU7r5BXxzJ4Ixn5HVBYEYuRkYOXY85kdvKGb-G-oCC0w8o/exec';
+    const defaultUrl = 'https://script.google.com/macros/s/AKfycybh-LwdwcqhcMD0ZVefdjmD2povXVeFSUR-Z5J3L6c7XBWWbAEG2LNZ1pnF5Kag6Tk/exec';
     this.scriptUrl = localStorage.getItem('google_script_url') || defaultUrl;
     this.syncEnabled = true;
     
@@ -64,12 +64,10 @@ class GoogleAppsScriptDB {
 
   // ========== ESCRIBIR DATOS ==========
   async guardarReportes(reportes) {
-    // Siempre guardar en localStorage primero (respaldo)
-    localStorage.setItem('gestion_taller_reportes', JSON.stringify(reportes));
-
+    // Solo guardar en Google Sheets, no en localStorage
     if (!this.isConfigured()) {
-      console.warn('⚠️ Google Apps Script no configurado, datos guardados solo en localStorage');
-      return true;
+      console.warn('⚠️ Google Apps Script no configurado, no se guardarán los datos');
+      return false;
     }
 
     try {
