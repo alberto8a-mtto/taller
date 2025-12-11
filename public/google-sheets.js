@@ -306,5 +306,28 @@ F1: email
   }
 }
 
-// Instancia global
-const googleSheets = new GoogleSheetsDB();
+// ========== UTILIDAD PARA INSERTAR DATOS DE PRUEBA LOCAL ==========
+function insertarDatosPruebaLocal() {
+  const reportesPrueba = [
+    {
+      id: 1,
+      numero_vehiculo: 'VH-001',
+      estado: 'EN PROCESO',
+      descripcion: 'Cambio de aceite',
+      tecnico_asignado: 'Juan',
+      taller_asignado: 'Taller 1',
+      diagnostico: 'Sin novedad',
+      analisis: 'Pendiente',
+      requiere_reparacion: false,
+      notas: 'Ninguna',
+      prueba_ruta: false,
+      fecha_reporte: new Date().toISOString(),
+      fecha_actualizacion: new Date().toISOString()
+    }
+  ];
+  localStorage.setItem('gestion_taller_reportes', JSON.stringify(reportesPrueba));
+  console.log('✅ Datos de prueba insertados en localStorage');
+}
+
+// Para usar: llamar insertarDatosPruebaLocal() en la consola del navegador o desde el código.
+

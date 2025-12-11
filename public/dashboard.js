@@ -95,33 +95,33 @@ function actualizarReloj() {
     minute: '2-digit',
     second: '2-digit'
   });
-  document.getElementById('currentTime').textContent = timeString;
+  const timeEl = document.getElementById('currentTime');
+  if (timeEl) timeEl.textContent = timeString;
 }
 
 // ========== CARGAR DATOS ==========
 async function cargarDatosDashboard() {
   try {
-    let reportes = [];
-    
-    // Intentar leer desde Google Sheets primero
-    if (typeof googleSheets !== 'undefined' && googleSheets.isConfigured()) {
+    // Primero usar localStorage para mostrar la UI de forma inmediata
+    let reportes = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+    // Si no hay datos locales, intentar cargar de Google Sheets (bloqueante)
+    if ((!reportes || reportes.length === 0) && typeof googleSheets !== 'undefined' && googleSheets.isConfigured()) {
       try {
         reportes = await googleSheets.leerReportes();
       } catch (error) {
-        console.warn('⚠️ Error al leer Google Sheets, usando localStorage:', error);
-        reportes = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        console.warn('⚠️ Error al leer Google Sheets inicialmente:', error);
+        // dejar reportes como está (vacío) para cargar datos iniciales
       }
-    } else {
-      // Obtener todos los reportes del localStorage
-      const data = localStorage.getItem(STORAGE_KEY);
-      reportes = data ? JSON.parse(data) : [];
     }
-    
-    // Si no hay datos, cargar datos por defecto
-    if (reportes.length === 0) {
+
+    // Si aún no hay datos, insertar datos iniciales locales
+    if (!reportes || reportes.length === 0) {
       cargarDatosIniciales();
       reportes = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     }
+
+    // Renderizar inmediatamente con los datos locales/obtenidos
     
     // Filtrar vehículos ocultos (SEGUIMIENTO y DISPONIBLE) y mostrar solo los activos
     let vehiculosEnProceso;
@@ -135,20 +135,54 @@ async function cargarDatosDashboard() {
     todosLosVehiculos = mezclarArray(vehiculosEnProceso);
     
     // Actualizar contador total
-    document.getElementById('countBadge').textContent = todosLosVehiculos.length;
+    const countBadge = document.getElementById('countBadge');
+    if (countBadge) countBadge.textContent = todosLosVehiculos.length;
     
     // Reiniciar página actual
     paginaActual = 0;
     
     // Mostrar primera página
     mostrarPaginaActual();
+
+    // Intentar actualizar en segundo plano desde Google Sheets (no bloquear la UI)
+    (async () => {
+      try {
+        if (typeof googleSheets !== 'undefined' && googleSheets.isConfigured()) {
+          const remote = await googleSheets.leerReportes();
+          // Si los datos remotos difieren, actualizar localStorage y volver a renderizar
+          if (remote && JSON.stringify(remote) !== JSON.stringify(reportes)) {
+            console.log('🔄 Datos remotos diferentes, actualizando vista con datos de Google Sheets');
+            const nuevos = mostrarTodos ? remote : remote.filter(r => !r.oculto && r.estado !== 'DISPONIBLE' && r.estado !== 'SEGUIMIENTO');
+            todosLosVehiculos = mezclarArray(nuevos);
+            const countBadge = document.getElementById('countBadge');
+            if (countBadge) countBadge.textContent = todosLosVehiculos.length;
+            paginaActual = 0;
+            mostrarPaginaActual();
+          }
+        }
+      } catch (e) {
+        console.debug('Actualización en background falló:', e);
+      }
+    })();
     
-    // Animación de actualización
+    // Animación de actualización (proteger si no existe el elemento)
     const indicator = document.getElementById('updateIndicator');
-    indicator.style.opacity = '0.5';
-    setTimeout(() => { indicator.style.opacity = '1'; }, 200);
+    if (indicator) {
+      indicator.style.opacity = '0.5';
+      setTimeout(() => { indicator.style.opacity = '1'; }, 200);
+    }
     
+    // Depuración: mostrar conteos y muestras de datos
     console.log('✅ Dashboard actualizado:', todosLosVehiculos.length, 'vehículos');
+    try {
+      const dbg = document.getElementById('ds-debug');
+      if (dbg) {
+        const preview = reportes && reportes.length ? JSON.stringify(reportes.slice(0,3)) : '[]';
+        dbg.textContent = `reportes=${reportes.length} · mostrados=${todosLosVehiculos.length} · preview=${preview}`;
+      }
+    } catch (e) {
+      console.debug('No se pudo actualizar ds-debug:', e);
+    }
   } catch (error) {
     console.error('Error al cargar datos:', error);
     mostrarError();
@@ -203,8 +237,12 @@ function mostrarPaginaActual() {
 // ========== MOSTRAR VEHÍCULOS ==========
 function mostrarVehiculos(vehiculos) {
   const container = document.getElementById('vehiclesGrid');
-  
-  if (vehiculos.length === 0) {
+  if (!container) {
+    console.warn('mostrarVehiculos: contenedor "vehiclesGrid" no encontrado en el DOM');
+    return;
+  }
+
+  if (!vehiculos || vehiculos.length === 0) {
     container.innerHTML = `
       <div class="no-data">
         <div class="no-data-icon">✅</div>
@@ -213,7 +251,7 @@ function mostrarVehiculos(vehiculos) {
     `;
     return;
   }
-  
+
   container.innerHTML = vehiculos.map(vehiculo => `
     <div class="vehicle-card estado-${normalizeEstado(vehiculo.estado)}">
       <div class="vehicle-header">
@@ -310,6 +348,10 @@ function formatearFechaCorta(fechaString) {
 
 function mostrarError() {
   const container = document.getElementById('vehiclesGrid');
+  if (!container) {
+    console.warn('mostrarError: contenedor "vehiclesGrid" no encontrado');
+    return;
+  }
   container.innerHTML = `
     <div class="no-data">
       <div class="no-data-icon">⚠️</div>
@@ -346,6 +388,50 @@ async function testEndpoint() {
     console.error('testEndpoint fetch error', err);
   }
 }
+
+// ========== UTILIDAD: forzar inserción de datos de prueba (disponible desde consola)
+function fuerzaInsertarDatosPrueba() {
+  try {
+    if (typeof insertarDatosPruebaLocal === 'function') {
+      insertarDatosPruebaLocal();
+      console.log('insertarDatosPruebaLocal() ejecutada');
+    } else {
+      const sample = [
+        {
+          id: 999999,
+          numero_vehiculo: 'TEST-001',
+          estado: 'EN PROCESO',
+          descripcion: 'Vehículo de prueba insertado automáticamente',
+          tecnico_asignado: 'Auto',
+          taller_asignado: 'Taller Prueba',
+          diagnostico: 'N/A',
+          notas: '',
+          requiere_reparacion: false,
+          prueba_ruta: false,
+          fecha_reporte: new Date().toISOString(),
+          fecha_actualizacion: new Date().toISOString()
+        }
+      ];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sample));
+      console.log('Datos de prueba guardados en localStorage bajo', STORAGE_KEY);
+    }
+  } catch (e) {
+    console.error('Error en fuerzaInsertarDatosPrueba:', e);
+  }
+  cargarDatosDashboard();
+}
+
+// Exponer función para fácil ejecución desde la consola
+try { window.fuerzaInsertarDatosPrueba = fuerzaInsertarDatosPrueba; } catch (e) {}
+
+// Capturar errores globales y mostrarlos en el debug panel
+window.addEventListener('error', (ev) => {
+  console.error('Global error capturado:', ev.error || ev.message, ev);
+  try {
+    const dbg = document.getElementById('ds-debug');
+    if (dbg) dbg.textContent = `GLOBAL ERROR: ${ev.message || ev.error}`;
+  } catch (e) {}
+});
 
 // ========== MANEJO DE VISIBILIDAD ==========
 document.addEventListener('visibilitychange', () => {
