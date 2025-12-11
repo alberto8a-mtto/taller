@@ -11,6 +11,44 @@ const VEHICULOS_POR_PAGINA = 8; // Cantidad de vehículos a mostrar por vez
 let paginaActual = 0;
 let todosLosVehiculos = [];
 
+// ========== CARGAR DATOS INICIALES (LOCAL) ==========
+function cargarDatosIniciales() {
+  try {
+    const existing = localStorage.getItem(STORAGE_KEY);
+    if (existing && JSON.parse(existing).length > 0) return;
+
+    // Si existe la función global de prueba en google-sheets.js, úsala
+    if (typeof insertarDatosPruebaLocal === 'function') {
+      insertarDatosPruebaLocal();
+      console.log('✅ cargarDatosIniciales: datos de prueba insertados por insertarDatosPruebaLocal()');
+      return;
+    }
+
+    // Si no, crear datos de prueba básicos
+    const sample = [
+      {
+        id: 1,
+        numero_vehiculo: 'VH-001',
+        estado: 'EN PROCESO',
+        descripcion: 'Cambio de aceite',
+        tecnico_asignado: 'Juan',
+        taller_asignado: 'Taller 1',
+        diagnostico: 'Revisión',
+        analisis: 'Pendiente',
+        requiere_reparacion: false,
+        notas: '',
+        prueba_ruta: false,
+        fecha_reporte: new Date().toISOString(),
+        fecha_actualizacion: new Date().toISOString()
+      }
+    ];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sample));
+    console.log('✅ cargarDatosIniciales: datos de ejemplo guardados en localStorage');
+  } catch (err) {
+    console.error('Error en cargarDatosIniciales:', err);
+  }
+}
+
 // ========== INICIALIZACIÓN ==========
 document.addEventListener('DOMContentLoaded', () => {
   console.log('📊 Dashboard TV iniciado');
@@ -25,6 +63,20 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Rotar vehículos cada 5 segundos
   rotationInterval = setInterval(rotarVehiculos, ROTATION_INTERVAL);
+
+  // Inicializar indicador de fuente de datos y botón de prueba
+  try {
+    const dsElem = document.getElementById('ds-source');
+    const btn = document.getElementById('btnTestEndpoint');
+    const status = document.getElementById('ds-status');
+    const url = localStorage.getItem('google_script_url') || '';
+    if (dsElem) dsElem.textContent = url ? 'Google Apps Script' : 'localStorage';
+    if (status) status.textContent = url ? '(sin probar)' : '(local)';
+    if (btn) btn.addEventListener('click', testEndpoint);
+  } catch (e) {
+    console.warn('Indicador de fuente no disponible:', e);
+  }
+
 });
 
 // ========== RELOJ ==========
@@ -245,6 +297,35 @@ function mostrarError() {
       <div class="no-data-text">Error al cargar datos. Reintentando...</div>
     </div>
   `;
+}
+
+// ========== PRUEBA DE ENDPOINT / INDICADOR DE FUENTE ==========
+async function testEndpoint() {
+  const status = document.getElementById('ds-status');
+  const url = localStorage.getItem('google_script_url') || '';
+  if (!url) {
+    if (status) status.textContent = 'No hay URL configurada';
+    return;
+  }
+  if (status) status.textContent = 'Probando...';
+  try {
+    const resp = await fetch(url + '?action=ping');
+    const text = await resp.text();
+    try {
+      const j = JSON.parse(text);
+      if (j && j.success) {
+        status.textContent = 'OK: ' + (j.message || 'Conexión');
+      } else {
+        status.textContent = 'Error: ' + (j.error || 'Respuesta sin success');
+      }
+    } catch (e) {
+      status.textContent = 'Respuesta no JSON';
+      console.error('testEndpoint parse error', e, text);
+    }
+  } catch (err) {
+    status.textContent = 'Fetch error';
+    console.error('testEndpoint fetch error', err);
+  }
 }
 
 // ========== MANEJO DE VISIBILIDAD ==========
