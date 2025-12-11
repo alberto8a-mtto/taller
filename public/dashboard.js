@@ -85,6 +85,28 @@ document.addEventListener('DOMContentLoaded', () => {
     console.warn('Indicador de fuente no disponible:', e);
   }
 
+  // Si estamos en GitHub Pages y no hay datos locales, forzar inserción de prueba
+  try {
+    const isGitHubPages = location && location.hostname && location.hostname.includes('github.io');
+    const localData = localStorage.getItem(STORAGE_KEY);
+    if (isGitHubPages && (!localData || JSON.parse(localData).length === 0)) {
+      // Esperar un poco para que la función fuerzaInsertarDatosPrueba esté disponible
+      setTimeout(() => {
+        try {
+          if (typeof fuerzaInsertarDatosPrueba === 'function') {
+            console.log('Detectado GitHub Pages y sin datos locales — insertando datos de prueba automáticamente');
+            fuerzaInsertarDatosPrueba();
+          } else if (typeof insertarDatosPruebaLocal === 'function') {
+            insertarDatosPruebaLocal();
+            cargarDatosDashboard();
+          }
+        } catch (e) {
+          console.debug('No se pudo insertar datos de prueba automáticamente:', e);
+        }
+      }, 300);
+    }
+  } catch (e) {}
+
 });
 
 // ========== RELOJ ==========
