@@ -193,5 +193,11 @@ class GoogleAppsScriptDB {
   }
 }
 
-// Instancia global
-const googleSheets = new GoogleAppsScriptDB();
+// Instancia global (protegida contra redeclaración si el script se carga varias veces)
+if (!window.googleSheets) {
+  try {
+    window.googleSheets = new GoogleAppsScriptDB();
+  } catch (e) {
+    console.error('No se pudo crear instancia global googleSheets:', e);
+  }
+}
