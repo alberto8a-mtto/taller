@@ -10,6 +10,7 @@ const STORAGE_KEY = 'gestion_taller_reportes';
 const VEHICULOS_POR_PAGINA = 8; // Cantidad de vehículos a mostrar por vez
 let paginaActual = 0;
 let todosLosVehiculos = [];
+let mostrarTodos = false;
 
 // ========== CARGAR DATOS INICIALES (LOCAL) ==========
 function cargarDatosIniciales() {
@@ -69,10 +70,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const dsElem = document.getElementById('ds-source');
     const btn = document.getElementById('btnTestEndpoint');
     const status = document.getElementById('ds-status');
+    const chk = document.getElementById('chkShowAll');
+    const dbg = document.getElementById('ds-debug');
     const url = localStorage.getItem('google_script_url') || '';
     if (dsElem) dsElem.textContent = url ? 'Google Apps Script' : 'localStorage';
     if (status) status.textContent = url ? '(sin probar)' : '(local)';
     if (btn) btn.addEventListener('click', testEndpoint);
+    if (chk) {
+      chk.checked = mostrarTodos;
+      chk.addEventListener('change', (e) => toggleMostrarTodos(e.target.checked));
+    }
+    if (dbg) dbg.textContent = '';
   } catch (e) {
     console.warn('Indicador de fuente no disponible:', e);
   }
@@ -116,7 +124,12 @@ async function cargarDatosDashboard() {
     }
     
     // Filtrar vehículos ocultos (SEGUIMIENTO y DISPONIBLE) y mostrar solo los activos
-    const vehiculosEnProceso = reportes.filter(r => !r.oculto && r.estado !== 'DISPONIBLE' && r.estado !== 'SEGUIMIENTO');
+    let vehiculosEnProceso;
+    if (mostrarTodos) {
+      vehiculosEnProceso = reportes;
+    } else {
+      vehiculosEnProceso = reportes.filter(r => !r.oculto && r.estado !== 'DISPONIBLE' && r.estado !== 'SEGUIMIENTO');
+    }
     
     // Mezclar aleatoriamente los vehículos
     todosLosVehiculos = mezclarArray(vehiculosEnProceso);
@@ -140,6 +153,12 @@ async function cargarDatosDashboard() {
     console.error('Error al cargar datos:', error);
     mostrarError();
   }
+}
+
+// Toggle para mostrar todos los reportes (incluye ocultos y estados filtrados)
+function toggleMostrarTodos(value) {
+  mostrarTodos = !!value;
+  cargarDatosDashboard();
 }
 
 // ========== MEZCLAR ARRAY ALEATORIAMENTE ==========
